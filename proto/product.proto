@@ -14,10 +14,9 @@ message ProductRequest {
 }
 
 message ProductResponse {
-  string name = 2;
-  string sku = 3;
-  string description = 4;
-  float price = 5;
+  string name = 1;
+  string sku = 2;
+  float price = 3;
 
   enum MarketType {
     CLOTHES = 0;
@@ -30,8 +29,8 @@ message ProductResponse {
     MarketType type = 2;
   }
 
-  repeated Department numbers = 6;
+  repeated Department numbers = 4;
 
-  google.protobuf.Timestamp last_updated = 7;
+  google.protobuf.Timestamp last_updated = 5;
 }
 
