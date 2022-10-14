@@ -43,21 +43,19 @@ func (c *productClient) GetProduct(ctx context.Context, in *ProductRequest, opts
 }
 
 // ProductServer is the server API for Product service.
-// All implementations must embed UnimplementedProductServer
+// All implementations should embed UnimplementedProductServer
 // for forward compatibility
 type ProductServer interface {
 	GetProduct(context.Context, *ProductRequest) (*ProductResponse, error)
-	mustEmbedUnimplementedProductServer()
 }
 
-// UnimplementedProductServer must be embedded to have forward compatible implementations.
+// UnimplementedProductServer should be embedded to have forward compatible implementations.
 type UnimplementedProductServer struct {
 }
 
 func (UnimplementedProductServer) GetProduct(context.Context, *ProductRequest) (*ProductResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetProduct not implemented")
 }
-func (UnimplementedProductServer) mustEmbedUnimplementedProductServer() {}
 
 // UnsafeProductServer may be embedded to opt out of forward compatibility for this service.
 // Use of this interface is not recommended, as added methods to ProductServer will
