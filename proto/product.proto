@@ -29,7 +29,7 @@ message ProductResponse {
     MarketType type = 2;
   }
 
-  repeated Department numbers = 4;
+  repeated Department departments = 4;
 
   google.protobuf.Timestamp last_updated = 5;
 }
