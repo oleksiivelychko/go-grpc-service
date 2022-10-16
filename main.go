@@ -10,6 +10,8 @@ import (
 	"os"
 )
 
+const localAddr = "localhost:9091"
+
 func main() {
 	logger := hclog.Default()
 	gServer := grpc.NewServer()
@@ -19,11 +21,16 @@ func main() {
 	gService.RegisterProductServer(gServer, sServer)
 	gService.RegisterCurrencyServer(gServer, sServer)
 
-	listen, err := net.Listen("tcp", "localhost:9091")
+	listen, err := net.Listen("tcp", localAddr)
 	if err != nil {
-		logger.Error("Unable to listen", "error", err)
+		logger.Error("unable to listen", "error", err)
 		os.Exit(1)
 	}
 
-	_ = gServer.Serve(listen)
+	logger.Info("starting gRPC server on", "addr", localAddr)
+	err = gServer.Serve(listen)
+	if err != nil {
+		logger.Error("unable to start gRPC server", "error", err)
+		os.Exit(1)
+	}
 }
