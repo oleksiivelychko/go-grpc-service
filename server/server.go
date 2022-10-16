@@ -33,6 +33,14 @@ func (s *Server) GetProduct(_ context.Context, pr *gService.ProductRequest) (*gS
 	}, nil
 }
 
+func (s *Server) MakeExchange(_ context.Context, r *gService.ExchangeRequest) (*gService.ExchangeResponse, error) {
+	s.log.Info("handle 'grpc_service.Currency.MakeExchange'", "from", r.GetFrom(), "to", r.GetTo())
+
+	return &gService.ExchangeResponse{
+		Rate: 0.1,
+	}, nil
+}
+
 /*
 *
 Requires to compile without 'require_unimplemented_servers'
