@@ -1,0 +1,23 @@
+syntax = "proto3";
+package grpc_service;
+
+option go_package = "./grpc_service";
+
+service Currency {
+  rpc MakeExchange(ExchangeRequest) returns (ExchangeResponse);
+}
+
+message ExchangeRequest {
+  string From = 1;
+  string To = 2;
+}
+
+message ExchangeResponse {
+  float Rate = 1;
+}
+
+enum Currencies {
+  EUR=0;
+  USD=1;
+  UAH=2;
+}
