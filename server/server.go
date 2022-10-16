@@ -17,8 +17,8 @@ func NewServer(l hclog.Logger) *Server {
 /*
 GetProduct returns the sample product.
 */
-func (s *Server) GetProduct(_ context.Context, pr *gService.ProductRequest) (*gService.ProductResponse, error) {
-	s.log.Info("handle 'grpc_service.Product.GetProduct'", "ID", pr.GetId())
+func (s *Server) GetProduct(_ context.Context, r *gService.ProductRequest) (*gService.ProductResponse, error) {
+	s.log.Info("[INFO] handle `grpc_service.Product.GetProduct`", "ID", r.GetId())
 
 	department := gService.ProductResponse_Department{
 		Number: "D1",
@@ -33,11 +33,14 @@ func (s *Server) GetProduct(_ context.Context, pr *gService.ProductRequest) (*gS
 	}, nil
 }
 
+/*
+MakeExchange returns the sample rate.
+*/
 func (s *Server) MakeExchange(_ context.Context, r *gService.ExchangeRequest) (*gService.ExchangeResponse, error) {
-	s.log.Info("handle 'grpc_service.Currency.MakeExchange'", "from", r.GetFrom(), "to", r.GetTo())
+	s.log.Info("[INFO] handle `grpc_service.Currency.MakeExchange`", "from", r.GetFrom(), "to", r.GetTo())
 
 	return &gService.ExchangeResponse{
-		Rate: 0.1,
+		Rate: 0.9,
 	}, nil
 }
 
