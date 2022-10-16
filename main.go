@@ -15,9 +15,11 @@ func main() {
 	gServer := grpc.NewServer()
 	reflection.Register(gServer)
 	sServer := server.NewServer(logger)
-	gService.RegisterProductServer(gServer, sServer)
 
-	listen, err := net.Listen("tcp", "localhost:9090")
+	gService.RegisterProductServer(gServer, sServer)
+	gService.RegisterCurrencyServer(gServer, sServer)
+
+	listen, err := net.Listen("tcp", "localhost:9091")
 	if err != nil {
 		logger.Error("Unable to listen", "error", err)
 		os.Exit(1)
