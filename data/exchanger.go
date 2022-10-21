@@ -4,6 +4,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"github.com/hashicorp/go-hclog"
+	"github.com/oleksiivelychko/go-grpc-protobuf/proto/grpc_service"
 	"net/http"
 	"strconv"
 )
@@ -28,6 +29,20 @@ func NewExchanger(l hclog.Logger) (*Exchanger, error) {
 	e := &Exchanger{log: l, rates: map[string]float64{}}
 	err := e.fetchRates()
 	return e, err
+}
+
+func (e *Exchanger) getRate(fromCurrency, toCurrency string) (float64, error) {
+	rateFromCurrency, ok := e.rates[fromCurrency]
+	if !ok {
+		return 0, fmt.Errorf("rate not found for base currency %s", fromCurrency)
+	}
+
+	rateToCurrency, ok := e.rates[toCurrency]
+	if !ok {
+		return 0, fmt.Errorf("rate not found for destination currency %s", toCurrency)
+	}
+
+	return rateFromCurrency / rateToCurrency, nil
 }
 
 func (e *Exchanger) fetchRates() error {
@@ -57,6 +72,8 @@ func (e *Exchanger) fetchRates() error {
 
 		e.rates[cube.Currency] = rate
 	}
+
+	e.rates[grpc_service.Currencies_EUR.String()] = 1
 
 	return nil
 }
