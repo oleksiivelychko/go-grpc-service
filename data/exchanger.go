@@ -31,7 +31,7 @@ func NewExchanger(l hclog.Logger) (*Exchanger, error) {
 	return e, err
 }
 
-func (e *Exchanger) getRate(fromCurrency, toCurrency string) (float64, error) {
+func (e *Exchanger) GetRate(fromCurrency, toCurrency string) (float64, error) {
 	rateFromCurrency, ok := e.rates[fromCurrency]
 	if !ok {
 		return 0, fmt.Errorf("rate not found for base currency %s", fromCurrency)
