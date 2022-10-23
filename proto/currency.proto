@@ -13,7 +13,7 @@ message ExchangeRequest {
 }
 
 message ExchangeResponse {
-  float Rate = 1;
+  double Rate = 1;
 }
 
 enum Currencies {
