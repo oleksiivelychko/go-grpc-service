@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/hashicorp/go-hclog"
+	"github.com/oleksiivelychko/go-grpc-protobuf/data"
 	gService "github.com/oleksiivelychko/go-grpc-protobuf/proto/grpc_service"
 	"github.com/oleksiivelychko/go-grpc-protobuf/server"
 	"google.golang.org/grpc"
@@ -16,10 +17,18 @@ func main() {
 	logger := hclog.Default()
 	gServer := grpc.NewServer()
 	reflection.Register(gServer)
-	sServer := server.NewServer(logger)
 
-	gService.RegisterProductServer(gServer, sServer)
-	gService.RegisterCurrencyServer(gServer, sServer)
+	exchanger, err := data.NewExchanger(logger)
+	if err != nil {
+		logger.Error("unable to create exchanger", "error", err)
+		os.Exit(1)
+	}
+
+	cServer := server.NewCurrencyServer(logger, exchanger)
+	pServer := server.NewProductServer(logger)
+
+	gService.RegisterCurrencyServer(gServer, cServer)
+	gService.RegisterProductServer(gServer, pServer)
 
 	listen, err := net.Listen("tcp", localAddr)
 	if err != nil {
