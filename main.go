@@ -18,7 +18,7 @@ func main() {
 	gServer := grpc.NewServer()
 	reflection.Register(gServer)
 
-	exchanger, err := data.NewExchanger(logger)
+	exchanger, err := data.NewExchanger()
 	if err != nil {
 		logger.Error("unable to create exchanger", "error", err)
 		os.Exit(1)
@@ -32,11 +32,11 @@ func main() {
 
 	listen, err := net.Listen("tcp", localAddr)
 	if err != nil {
-		logger.Error("unable to listen", "error", err)
+		logger.Error("unable to listen tcp", "error", err)
 		os.Exit(1)
 	}
 
-	logger.Info("starting gRPC server on", "addr", localAddr)
+	logger.Info("starting gRPC server", "listening", localAddr)
 	err = gServer.Serve(listen)
 	if err != nil {
 		logger.Error("unable to start gRPC server", "error", err)
