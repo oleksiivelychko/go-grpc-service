@@ -3,7 +3,6 @@ package data
 import (
 	"encoding/xml"
 	"fmt"
-	"github.com/hashicorp/go-hclog"
 	"github.com/oleksiivelychko/go-grpc-protobuf/proto/grpc_service"
 	"net/http"
 	"strconv"
@@ -12,7 +11,6 @@ import (
 const targetUrl = "https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml"
 
 type Exchanger struct {
-	log   hclog.Logger
 	rates map[string]float64
 }
 
@@ -25,8 +23,8 @@ type Cubes struct {
 	Data []Cube `xml:"Cube>Cube>Cube"`
 }
 
-func NewExchanger(l hclog.Logger) (*Exchanger, error) {
-	e := &Exchanger{log: l, rates: map[string]float64{}}
+func NewExchanger() (*Exchanger, error) {
+	e := &Exchanger{rates: map[string]float64{}}
 	err := e.fetchRates()
 	return e, err
 }
@@ -66,8 +64,7 @@ func (e *Exchanger) fetchRates() error {
 	for _, cube := range cubes.Data {
 		rate, parseErr := strconv.ParseFloat(cube.Rate, 64)
 		if parseErr != nil {
-			e.log.Error("[ERROR] cannot parse the rate value to float", "error", parseErr)
-			continue
+			return fmt.Errorf("cannot parse the rate value `%s` to float. %s", cube.Rate, parseErr)
 		}
 
 		e.rates[cube.Currency] = rate
