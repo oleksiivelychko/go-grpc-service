@@ -18,7 +18,7 @@ func NewProductServer(l hclog.Logger) *ProductServer {
 GetProduct returns the sample product.
 */
 func (s *ProductServer) GetProduct(_ context.Context, r *gService.ProductRequest) (*gService.ProductResponse, error) {
-	s.log.Info("[INFO] handle `grpc_service.Product.GetProduct`", "ID", r.GetId())
+	s.log.Info("handle `grpc_service.Product.GetProduct`", "id", r.GetId())
 
 	department := gService.ProductResponse_Department{
 		Number: "D1",

@@ -17,11 +17,11 @@ func NewCurrencyServer(l hclog.Logger, e *data.Exchanger) *CurrencyServer {
 }
 
 func (cs *CurrencyServer) MakeExchange(_ context.Context, r *gService.ExchangeRequest) (*gService.ExchangeResponse, error) {
-	cs.log.Info("[INFO] handle `grpc_service.Currency.MakeExchange`", "from", r.GetFrom(), "to", r.GetTo())
+	cs.log.Info("handle `grpc_service.Currency.MakeExchange`", "from", r.GetFrom(), "to", r.GetTo())
 
 	rate, err := cs.e.GetRate(r.GetFrom(), r.GetTo())
 	if err != nil {
-		cs.log.Info("[ERROR] cannot get rate", "error", err)
+		cs.log.Error("cannot get rate", "error", err)
 	}
 
 	return &gService.ExchangeResponse{
