@@ -25,10 +25,7 @@ func main() {
 	}
 
 	cServer := server.NewCurrencyServer(logger, exchanger)
-	pServer := server.NewProductServer(logger)
-
 	gService.RegisterCurrencyServer(gServer, cServer)
-	gService.RegisterProductServer(gServer, pServer)
 
 	listen, err := net.Listen("tcp", localAddr)
 	if err != nil {
