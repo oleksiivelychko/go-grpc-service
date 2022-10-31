@@ -1,19 +1,27 @@
 syntax = "proto3";
 package grpc_service;
 
+import "google/protobuf/timestamp.proto";
+
 option go_package = "./grpc_service";
 
 service Currency {
   rpc MakeExchange(ExchangeRequest) returns (ExchangeResponse);
+  // allows a client to subscribe for changes
+  // when the rate changes a response will be sent
+  rpc Subscriber(stream ExchangeRequest) returns (stream ExchangeResponse);
 }
 
 message ExchangeRequest {
-  string From = 1;
-  string To = 2;
+  Currencies From = 1;
+  Currencies To = 2;
 }
 
 message ExchangeResponse {
-  double Rate = 1;
+  double rate = 1;
+  Currencies From = 2;
+  Currencies To = 3;
+  google.protobuf.Timestamp updatedAt = 4;
 }
 
 enum Currencies {
