@@ -5,7 +5,6 @@ import (
 	"github.com/hashicorp/go-hclog"
 	"github.com/oleksiivelychko/go-grpc-protobuf/processor"
 	gService "github.com/oleksiivelychko/go-grpc-protobuf/proto/grpc_service"
-	"google.golang.org/protobuf/types/known/timestamppb"
 	"io"
 	"time"
 )
@@ -40,7 +39,13 @@ func (cs *CurrencyServer) handleUpdates() {
 					cs.log.Error("unable to get update of rate", "from", fromCurrency, "to", toCurrency)
 				}
 
-				err = k.Send(&gService.ExchangeResponse{From: exchangeRequest.From, To: exchangeRequest.To, Rate: rate})
+				err = k.Send(&gService.ExchangeResponse{
+					From:      exchangeRequest.From,
+					To:        exchangeRequest.To,
+					Rate:      rate,
+					CreatedAt: cs.exchanger.GetProtoTime(),
+				})
+
 				if err != nil {
 					cs.log.Error("unable to send update of rate", "from", fromCurrency, "to", toCurrency, "rate", rate)
 				}
@@ -61,15 +66,16 @@ func (cs *CurrencyServer) MakeExchange(_ context.Context, r *gService.ExchangeRe
 		Rate:      rate,
 		From:      r.GetFrom(),
 		To:        r.GetTo(),
-		UpdatedAt: timestamppb.Now(),
+		CreatedAt: cs.exchanger.GetProtoTime(),
 	}, nil
 }
 
 /*
-Subscriber handles client messages.
+Subscriber implements the gRPC bidirectional streaming method.
 */
 func (cs *CurrencyServer) Subscriber(srv gService.Currency_SubscriberServer) error {
 	for {
+		// handles client messages
 		exchangeRequest, err := srv.Recv() // is blocking method
 		if err == io.EOF {
 			cs.log.Error("client has closed connection")
