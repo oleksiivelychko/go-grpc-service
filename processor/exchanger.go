@@ -2,8 +2,10 @@ package processor
 
 import (
 	"fmt"
+	"github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/oleksiivelychko/go-grpc-protobuf/data"
 	"github.com/oleksiivelychko/go-grpc-protobuf/proto/grpc_service"
+	"google.golang.org/protobuf/types/known/timestamppb"
 	"math/rand"
 	"strconv"
 	"time"
@@ -88,4 +90,13 @@ func (e *Exchanger) TrackRates(interval time.Duration) chan struct{} {
 	}()
 
 	return ch
+}
+
+func (e *Exchanger) GetProtoTime() *timestamp.Timestamp {
+	createdAt, err := time.Parse("2006-01-02", e.extractor.RootNode.Data.Time)
+	if err != nil {
+		createdAt = timestamppb.Now().AsTime()
+	}
+
+	return timestamppb.New(createdAt)
 }
