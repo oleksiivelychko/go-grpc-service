@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/hashicorp/go-hclog"
 	"github.com/oleksiivelychko/go-grpc-protobuf/data"
+	"github.com/oleksiivelychko/go-grpc-protobuf/processor"
 	gService "github.com/oleksiivelychko/go-grpc-protobuf/proto/grpc_service"
 	"github.com/oleksiivelychko/go-grpc-protobuf/server"
 	"google.golang.org/grpc"
@@ -18,7 +19,8 @@ func main() {
 	gServer := grpc.NewServer()
 	reflection.Register(gServer)
 
-	exchanger, err := data.NewExchanger()
+	extractor := data.NewExtractorXml(data.SourceLocal)
+	exchanger, err := processor.NewExchanger(extractor)
 	if err != nil {
 		logger.Error("unable to create exchanger", "error", err)
 		os.Exit(1)
