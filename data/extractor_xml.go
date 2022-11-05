@@ -13,14 +13,14 @@ import (
 const xmlUrl = "https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml"
 
 const (
-	sourceRemote = iota
-	sourceLocal
+	SourceRemote = iota
+	SourceLocal
 )
 
 type source int8
 
 type ExtractorXml struct {
-	rootNode *RootNode
+	RootNode *RootNode
 	source   source
 }
 
@@ -43,7 +43,7 @@ func NewExtractorXml(src source) *ExtractorXml {
 }
 
 func (e *ExtractorXml) FetchRates() error {
-	if e.source == sourceRemote {
+	if e.source == SourceRemote {
 		if err := e.decodeFromRemote(); err != nil {
 			return err
 		}
@@ -77,7 +77,7 @@ func (e *ExtractorXml) decodeFromRemote() error {
 
 	defer body.Close()
 
-	return xml.NewDecoder(body).Decode(e.rootNode)
+	return xml.NewDecoder(body).Decode(e.RootNode)
 }
 
 func (e *ExtractorXml) readFromRemote() ([]byte, error) {
@@ -93,7 +93,7 @@ func (e *ExtractorXml) readFromRemote() ([]byte, error) {
 		return []byte{}, fmt.Errorf("read response body: %v", err)
 	}
 
-	e.source = sourceRemote
+	e.source = SourceRemote
 	return data, nil
 }
 
@@ -114,11 +114,11 @@ func (e *ExtractorXml) readFromLocal() error {
 	} else {
 		data, err = os.ReadFile(e.getFilePath())
 		if err == nil {
-			e.source = sourceLocal
+			e.source = SourceLocal
 		}
 	}
 
-	return xml.Unmarshal(data, &e.rootNode)
+	return xml.Unmarshal(data, &e.RootNode)
 }
 
 /*

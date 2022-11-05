@@ -6,22 +6,22 @@ import (
 )
 
 func TestFetchRatesFromRemote(t *testing.T) {
-	extractor := NewExtractorXml(sourceRemote)
+	extractor := NewExtractorXml(SourceRemote)
 
 	err := extractor.FetchRates()
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
 
-	if extractor.source != sourceRemote {
+	if extractor.source != SourceRemote {
 		t.Fatal("extracted from non-remote source")
 	}
 
-	if extractor.rootNode.Data.Time == "" {
+	if extractor.RootNode.Data.Time == "" {
 		t.Fatal("attribute `time` did not extracted from `Cube` element")
 	}
 
-	for _, cube := range extractor.rootNode.Data.Cubes {
+	for _, cube := range extractor.RootNode.Data.Cubes {
 		_, parseErr := strconv.ParseFloat(cube.Rate, 64)
 		if parseErr != nil {
 			t.Fatal(parseErr)
@@ -30,7 +30,7 @@ func TestFetchRatesFromRemote(t *testing.T) {
 }
 
 func TestFetchRatesFromLocalFirst(t *testing.T) {
-	extractor := NewExtractorXml(sourceLocal)
+	extractor := NewExtractorXml(SourceLocal)
 
 	if extractor.isExistFile() {
 		err := extractor.removeFile()
@@ -44,15 +44,15 @@ func TestFetchRatesFromLocalFirst(t *testing.T) {
 		t.Fatalf(err.Error())
 	}
 
-	if extractor.source != sourceRemote {
+	if extractor.source != SourceRemote {
 		t.Fatal("extracted from non-remote source")
 	}
 
-	if extractor.rootNode.Data.Time == "" {
+	if extractor.RootNode.Data.Time == "" {
 		t.Fatal("attribute `time` did not extracted from `Cube` element")
 	}
 
-	for _, cube := range extractor.rootNode.Data.Cubes {
+	for _, cube := range extractor.RootNode.Data.Cubes {
 		_, parseErr := strconv.ParseFloat(cube.Rate, 64)
 		if parseErr != nil {
 			t.Fatal(parseErr)
@@ -61,7 +61,7 @@ func TestFetchRatesFromLocalFirst(t *testing.T) {
 }
 
 func TestFetchRatesFromLocal(t *testing.T) {
-	extractor := NewExtractorXml(sourceLocal)
+	extractor := NewExtractorXml(SourceLocal)
 
 	err := extractor.FetchRates()
 	if err != nil {
@@ -72,15 +72,15 @@ func TestFetchRatesFromLocal(t *testing.T) {
 		t.Fatalf("local file `./go-grpc-protobuf/rates.xml` doesn't exist")
 	}
 
-	if extractor.source != sourceLocal {
+	if extractor.source != SourceLocal {
 		t.Fatal("extracted from non-local source")
 	}
 
-	if extractor.rootNode.Data.Time == "" {
+	if extractor.RootNode.Data.Time == "" {
 		t.Fatal("attribute `time` did not extracted from `Cube` element")
 	}
 
-	for _, cube := range extractor.rootNode.Data.Cubes {
+	for _, cube := range extractor.RootNode.Data.Cubes {
 		_, parseErr := strconv.ParseFloat(cube.Rate, 64)
 		if parseErr != nil {
 			t.Fatal(parseErr)
