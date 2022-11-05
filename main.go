@@ -15,7 +15,7 @@ import (
 const localAddr = "localhost:9091"
 
 func main() {
-	logger := hclog.Default()
+	logger := hclog.New(&hclog.LoggerOptions{TimeFormat: "2006/01/02 15:04:05", Color: 1})
 	gServer := grpc.NewServer()
 	reflection.Register(gServer)
 
