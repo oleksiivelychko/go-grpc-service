@@ -19,9 +19,9 @@ message ExchangeRequest {
 
 message ExchangeResponse {
   double rate = 1;
-  Currencies From = 2;
-  Currencies To = 3;
-  google.protobuf.Timestamp updatedAt = 4;
+  Currencies from = 2;
+  Currencies to = 3;
+  google.protobuf.Timestamp createdAt = 4;
 }
 
 enum Currencies {
