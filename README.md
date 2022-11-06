@@ -2,7 +2,7 @@
 
 ### gRPC service implementation is sharing the Protocol Buffer messages.
 
-Install gRPCurl as `brew install grpcurl` and then test all in one:
+Install gRPCurl as `brew install grpcurl` and then test it as:
 ```
 grpcurl --plaintext localhost:9091 list
 grpcurl --plaintext localhost:9091 list grpc_service.Currency
