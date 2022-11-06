@@ -1,4 +1,4 @@
-module github.com/oleksiivelychko/go-grpc-protobuf
+module github.com/oleksiivelychko/go-grpc-service
 
 go 1.19
 

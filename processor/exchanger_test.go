@@ -2,12 +2,12 @@ package processor
 
 import (
 	"fmt"
-	"github.com/oleksiivelychko/go-grpc-protobuf/data"
+	"github.com/oleksiivelychko/go-grpc-service/data"
 	"testing"
 )
 
 func TestNewExchanger(t *testing.T) {
-	extractor := data.NewExtractorXml(data.SourceLocal)
+	extractor := data.NewExtractor(data.SourceLocal)
 	e, err := NewExchanger(extractor)
 
 	if err != nil {

@@ -3,8 +3,8 @@ package processor
 import (
 	"fmt"
 	"github.com/golang/protobuf/ptypes/timestamp"
-	"github.com/oleksiivelychko/go-grpc-protobuf/data"
-	"github.com/oleksiivelychko/go-grpc-protobuf/proto/grpc_service"
+	"github.com/oleksiivelychko/go-grpc-service/data"
+	"github.com/oleksiivelychko/go-grpc-service/proto/grpc_service"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"math/rand"
 	"strconv"
@@ -13,10 +13,10 @@ import (
 
 type Exchanger struct {
 	rates     map[string]float64
-	extractor *data.ExtractorXml
+	extractor *data.Extractor
 }
 
-func NewExchanger(e *data.ExtractorXml) (*Exchanger, error) {
+func NewExchanger(e *data.Extractor) (*Exchanger, error) {
 	exchanger := &Exchanger{extractor: e, rates: map[string]float64{}}
 	err := exchanger.processRates()
 	return exchanger, err

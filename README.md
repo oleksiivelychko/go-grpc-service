@@ -1,6 +1,6 @@
-# go-grpc-protobuf
+# go-grpc-service
 
-### gRPC service implementation is sharing the Protocol Buffer messages.
+### The gRPC service serves external requests are sharing the Protocol Buffer messages.
 
 Install gRPCurl as `brew install grpcurl` and then test it as:
 ```

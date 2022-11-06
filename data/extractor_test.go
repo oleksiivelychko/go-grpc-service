@@ -6,7 +6,7 @@ import (
 )
 
 func TestFetchRatesFromRemote(t *testing.T) {
-	extractor := NewExtractorXml(SourceRemote)
+	extractor := NewExtractor(SourceRemote)
 
 	err := extractor.FetchRates()
 	if err != nil {
@@ -30,7 +30,7 @@ func TestFetchRatesFromRemote(t *testing.T) {
 }
 
 func TestFetchRatesFromLocalFirst(t *testing.T) {
-	extractor := NewExtractorXml(SourceLocal)
+	extractor := NewExtractor(SourceLocal)
 
 	if extractor.isExistFile() {
 		err := extractor.removeFile()
@@ -61,7 +61,7 @@ func TestFetchRatesFromLocalFirst(t *testing.T) {
 }
 
 func TestFetchRatesFromLocal(t *testing.T) {
-	extractor := NewExtractorXml(SourceLocal)
+	extractor := NewExtractor(SourceLocal)
 
 	err := extractor.FetchRates()
 	if err != nil {
@@ -69,7 +69,7 @@ func TestFetchRatesFromLocal(t *testing.T) {
 	}
 
 	if !extractor.isExistFile() {
-		t.Fatalf("local file `./go-grpc-protobuf/rates.xml` doesn't exist")
+		t.Fatalf("local file `./go-grpc-service/rates.xml` doesn't exist")
 	}
 
 	if extractor.source != SourceLocal {

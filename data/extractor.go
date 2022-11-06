@@ -19,7 +19,7 @@ const (
 
 type source int8
 
-type ExtractorXml struct {
+type Extractor struct {
 	RootNode *RootNode
 	source   source
 }
@@ -38,11 +38,11 @@ type Cube struct {
 	Rate     string `xml:"rate,attr"`
 }
 
-func NewExtractorXml(src source) *ExtractorXml {
-	return &ExtractorXml{&RootNode{}, src}
+func NewExtractor(src source) *Extractor {
+	return &Extractor{&RootNode{}, src}
 }
 
-func (e *ExtractorXml) FetchRates() error {
+func (e *Extractor) FetchRates() error {
 	if e.source == SourceRemote {
 		if err := e.decodeFromRemote(); err != nil {
 			return err
@@ -56,7 +56,7 @@ func (e *ExtractorXml) FetchRates() error {
 	return nil
 }
 
-func (e *ExtractorXml) makeRequest(url string) (io.ReadCloser, error) {
+func (e *Extractor) makeRequest(url string) (io.ReadCloser, error) {
 	resp, err := http.DefaultClient.Get(url)
 	if err != nil {
 		return nil, fmt.Errorf("GET `%s` got error: %s", url, err)
@@ -69,7 +69,7 @@ func (e *ExtractorXml) makeRequest(url string) (io.ReadCloser, error) {
 	return resp.Body, nil
 }
 
-func (e *ExtractorXml) decodeFromRemote() error {
+func (e *Extractor) decodeFromRemote() error {
 	body, err := e.makeRequest(xmlUrl)
 	if err != nil {
 		return err
@@ -80,7 +80,7 @@ func (e *ExtractorXml) decodeFromRemote() error {
 	return xml.NewDecoder(body).Decode(e.RootNode)
 }
 
-func (e *ExtractorXml) readFromRemote() ([]byte, error) {
+func (e *Extractor) readFromRemote() ([]byte, error) {
 	body, err := e.makeRequest(xmlUrl)
 	if err != nil {
 		return []byte{}, err
@@ -101,7 +101,7 @@ func (e *ExtractorXml) readFromRemote() ([]byte, error) {
 *
 readFromLocal tries to read data from local file and if failed - get them from remote source and then save to file.
 */
-func (e *ExtractorXml) readFromLocal() error {
+func (e *Extractor) readFromLocal() error {
 	var data []byte
 	var err error
 
@@ -125,10 +125,10 @@ func (e *ExtractorXml) readFromLocal() error {
 *
 save writes data from remote source into file.
 */
-func (e *ExtractorXml) save(data []byte) (int, error) {
+func (e *Extractor) save(data []byte) (int, error) {
 	ratesXml, err := os.OpenFile(e.getFilePath(), os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)
 	if err != nil {
-		return 0, fmt.Errorf("unable to create `./go-grpc-protobuf/rates.xml`. %s", err)
+		return 0, fmt.Errorf("unable to create `./go-grpc-service/rates.xml`. %s", err)
 	}
 	defer ratesXml.Close()
 
@@ -142,9 +142,9 @@ func (e *ExtractorXml) save(data []byte) (int, error) {
 
 /*
 getFilePath returns absolute path to xml file regarding project directory.
-./go-grpc-protobuf/rates.xml
+./go-grpc-service/rates.xml
 */
-func (e *ExtractorXml) getFilePath() string {
+func (e *Extractor) getFilePath() string {
 	wd, err := os.Getwd()
 	if err != nil {
 		panic(err)
@@ -153,7 +153,7 @@ func (e *ExtractorXml) getFilePath() string {
 	return filepath.Join(wd, "./../rates.xml")
 }
 
-func (e *ExtractorXml) removeFile() error {
+func (e *Extractor) removeFile() error {
 	wd, err := os.Getwd()
 	if err != nil {
 		return err
@@ -162,7 +162,7 @@ func (e *ExtractorXml) removeFile() error {
 	return os.Remove(filepath.Join(wd, "./../rates.xml"))
 }
 
-func (e *ExtractorXml) isExistFile() bool {
+func (e *Extractor) isExistFile() bool {
 	_, err := os.Stat(e.getFilePath())
 	return !errors.Is(err, os.ErrNotExist)
 }

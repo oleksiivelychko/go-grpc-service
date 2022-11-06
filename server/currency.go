@@ -3,8 +3,8 @@ package server
 import (
 	"context"
 	"github.com/hashicorp/go-hclog"
-	"github.com/oleksiivelychko/go-grpc-protobuf/processor"
-	gService "github.com/oleksiivelychko/go-grpc-protobuf/proto/grpc_service"
+	"github.com/oleksiivelychko/go-grpc-service/processor"
+	gService "github.com/oleksiivelychko/go-grpc-service/proto/grpc_service"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"io"
@@ -12,7 +12,7 @@ import (
 )
 
 type CurrencyServer struct {
-	log               hclog.Logger
+	logger            hclog.Logger
 	exchanger         *processor.Exchanger
 	subscribedClients map[gService.Currency_SubscriberServer][]*gService.ExchangeRequest
 }
@@ -29,24 +29,23 @@ func NewCurrencyServer(l hclog.Logger, e *processor.Exchanger) *CurrencyServer {
 func (cs *CurrencyServer) handleUpdates() {
 	updates := cs.exchanger.TrackRates(5 * time.Second)
 	for range updates {
-		cs.log.Info("handling updates...")
-		// loop over the subscribed clients
+		cs.logger.Info("handling updates...")
+
 		for subscribedClient, exchangeRequests := range cs.subscribedClients {
-			// loop over the subscribed rates
 			for _, exchangeRequest := range exchangeRequests {
 				fromCurrency := exchangeRequest.GetFrom().String()
 				toCurrency := exchangeRequest.GetTo().String()
 
 				rate, err := cs.exchanger.GetRate(fromCurrency, toCurrency)
 				if err != nil {
-					cs.log.Error("unable to get update of rate", "from", fromCurrency, "to", toCurrency)
+					cs.logger.Error("unable to get update of rate", "from", fromCurrency, "to", toCurrency)
 				}
 
 				err = subscribedClient.Send(&gService.StreamExchangeResponse{
 					Message: &gService.StreamExchangeResponse_ExchangeResponse{
 						ExchangeResponse: &gService.ExchangeResponse{
-							From:      exchangeRequest.From,
-							To:        exchangeRequest.To,
+							From:      exchangeRequest.GetFrom(),
+							To:        exchangeRequest.GetTo(),
 							Rate:      rate,
 							CreatedAt: cs.exchanger.GetProtoTime(),
 						},
@@ -54,7 +53,7 @@ func (cs *CurrencyServer) handleUpdates() {
 				})
 
 				if err != nil {
-					cs.log.Error("unable to send updated rate", "from", fromCurrency, "to", toCurrency, "rate", rate)
+					cs.logger.Error("unable to send updated rate", "from", fromCurrency, "to", toCurrency, "rate", rate)
 				}
 			}
 		}
@@ -62,7 +61,7 @@ func (cs *CurrencyServer) handleUpdates() {
 }
 
 func (cs *CurrencyServer) MakeExchange(_ context.Context, r *gService.ExchangeRequest) (*gService.ExchangeResponse, error) {
-	cs.log.Info("handle `grpc_service.Currency.MakeExchange`", "from", r.GetFrom(), "to", r.GetTo())
+	cs.logger.Info("handle `grpc_service.Currency.MakeExchange`", "from", r.GetFrom(), "to", r.GetTo())
 
 	if r.GetFrom() == r.GetTo() {
 		grpcErr := status.Newf(
@@ -82,7 +81,7 @@ func (cs *CurrencyServer) MakeExchange(_ context.Context, r *gService.ExchangeRe
 
 	rate, err := cs.exchanger.GetRate(r.GetFrom().String(), r.GetTo().String())
 	if err != nil {
-		cs.log.Error("cannot get rate", "error", err)
+		cs.logger.Error("cannot get rate", "error", err)
 	}
 
 	return &gService.ExchangeResponse{
@@ -102,16 +101,16 @@ func (cs *CurrencyServer) Subscriber(srv gService.Currency_SubscriberServer) err
 		// 'Recv' is a blocking method which returns on client data.
 		exchangeRequest, err := srv.Recv()
 		if err == io.EOF {
-			cs.log.Error("client has closed the connection")
+			cs.logger.Error("client has closed the connection")
 			break
 		}
 
 		if err != nil {
-			cs.log.Error("unable to read from client", "error", err)
+			cs.logger.Error("unable to read from client", "error", err)
 			return err
 		}
 
-		cs.log.Info("handle client request", "From", exchangeRequest.GetFrom(), "To", exchangeRequest.GetTo())
+		cs.logger.Info("handle client request", "From", exchangeRequest.GetFrom(), "To", exchangeRequest.GetTo())
 
 		subscribedClient, ok := cs.subscribedClients[srv]
 		if !ok {
@@ -131,7 +130,7 @@ func (cs *CurrencyServer) Subscriber(srv gService.Currency_SubscriberServer) err
 				)
 
 				if validationErr, err = validationErr.WithDetails(exchangeRequest); err != nil {
-					cs.log.Error("unable to original request as metadata", "error", err)
+					cs.logger.Error("unable to original request as metadata", "error", err)
 				}
 
 				break
@@ -146,7 +145,7 @@ func (cs *CurrencyServer) Subscriber(srv gService.Currency_SubscriberServer) err
 			})
 
 			if err != nil {
-				cs.log.Error("unable to send validation message", "error", err)
+				cs.logger.Error("unable to send validation message", "error", err)
 			}
 
 			continue
@@ -164,5 +163,5 @@ func (cs *CurrencyServer) Subscriber(srv gService.Currency_SubscriberServer) err
 mustEmbedUnimplementedCurrencyServer is required to compile without 'require_unimplemented_servers'.
 */
 func (cs *CurrencyServer) mustEmbedUnimplementedCurrencyServer() {
-	cs.log.Info("implement mustEmbedUnimplementedCurrencyServer for backward compatibility")
+	cs.logger.Info("implement mustEmbedUnimplementedCurrencyServer for backward compatibility")
 }
