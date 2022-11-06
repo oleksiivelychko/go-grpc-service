@@ -5,6 +5,8 @@ import (
 	"github.com/hashicorp/go-hclog"
 	"github.com/oleksiivelychko/go-grpc-protobuf/processor"
 	gService "github.com/oleksiivelychko/go-grpc-protobuf/proto/grpc_service"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"io"
 	"time"
 )
@@ -57,6 +59,22 @@ func (cs *CurrencyServer) handleUpdates() {
 
 func (cs *CurrencyServer) MakeExchange(_ context.Context, r *gService.ExchangeRequest) (*gService.ExchangeResponse, error) {
 	cs.log.Info("handle `grpc_service.Currency.MakeExchange`", "from", r.GetFrom(), "to", r.GetTo())
+
+	if r.GetFrom() == r.GetTo() {
+		grpcErr := status.Newf(
+			codes.InvalidArgument,
+			"base currency '%s' cannot be the same as destination '%s'",
+			r.GetFrom(),
+			r.GetTo(),
+		)
+
+		grpcStatus, err := grpcErr.WithDetails(r)
+		if err != nil {
+			return nil, err
+		}
+
+		return nil, grpcStatus.Err()
+	}
 
 	rate, err := cs.exchanger.GetRate(r.GetFrom().String(), r.GetTo().String())
 	if err != nil {

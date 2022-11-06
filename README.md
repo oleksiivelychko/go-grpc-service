@@ -8,12 +8,12 @@ grpcurl --plaintext localhost:9091 list
 grpcurl --plaintext localhost:9091 list grpc_service.Currency
 grpcurl --plaintext localhost:9091 describe grpc_service.Currency.MakeExchange
 grpcurl --plaintext localhost:9091 describe .grpc_service.ExchangeRequest
-grpcurl --plaintext -d '{"from": "EUR", "to": "USD"}' localhost:9091 grpc_service.Currency.MakeExchange
+grpcurl --plaintext -d '{"From": "EUR", "To": "USD"}' localhost:9091 grpc_service.Currency.MakeExchange
 grpcurl --plaintext --msg-template -d @ localhost:9091 describe .grpc_service.ExchangeRequest
 grpcurl --plaintext --msg-template -d @ localhost:9091 grpc_service.Currency.Subscriber
 ```
 
-Template message:
+Template message (might be inserted into stream as is):
 ```
 {
   "From": "EUR",
