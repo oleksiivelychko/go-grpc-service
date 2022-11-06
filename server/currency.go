@@ -42,11 +42,15 @@ func (cs *CurrencyServer) handleUpdates() {
 					cs.log.Error("unable to get update of rate", "from", fromCurrency, "to", toCurrency)
 				}
 
-				err = subscribedClient.Send(&gService.ExchangeResponse{
-					From:      exchangeRequest.From,
-					To:        exchangeRequest.To,
-					Rate:      rate,
-					CreatedAt: cs.exchanger.GetProtoTime(),
+				err = subscribedClient.Send(&gService.StreamExchangeResponse{
+					Message: &gService.StreamExchangeResponse_ExchangeResponse{
+						ExchangeResponse: &gService.ExchangeResponse{
+							From:      exchangeRequest.From,
+							To:        exchangeRequest.To,
+							Rate:      rate,
+							CreatedAt: cs.exchanger.GetProtoTime(),
+						},
+					},
 				})
 
 				if err != nil {
@@ -112,6 +116,40 @@ func (cs *CurrencyServer) Subscriber(srv gService.Currency_SubscriberServer) err
 		subscribedClient, ok := cs.subscribedClients[srv]
 		if !ok {
 			subscribedClient = []*gService.ExchangeRequest{}
+		}
+
+		var validationErr *status.Status
+		// check that subscriber does not exist
+		for _, client := range subscribedClient {
+			if client.From == exchangeRequest.From && client.To == exchangeRequest.To {
+				// subscriber exists, return error
+				validationErr = status.Newf(
+					codes.AlreadyExists,
+					"unable to subscribe for currency as subscription already exists: base '%s', destination '%s'",
+					exchangeRequest.GetFrom(),
+					exchangeRequest.GetTo(),
+				)
+
+				if validationErr, err = validationErr.WithDetails(exchangeRequest); err != nil {
+					cs.log.Error("unable to original request as metadata", "error", err)
+				}
+
+				break
+			}
+		}
+
+		if validationErr != nil {
+			err = srv.Send(&gService.StreamExchangeResponse{
+				Message: &gService.StreamExchangeResponse_Error{
+					Error: validationErr.Proto(),
+				},
+			})
+
+			if err != nil {
+				cs.log.Error("unable to send validation message", "error", err)
+			}
+
+			continue
 		}
 
 		subscribedClient = append(subscribedClient, exchangeRequest)
