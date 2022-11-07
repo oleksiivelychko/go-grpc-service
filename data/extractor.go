@@ -11,6 +11,7 @@ import (
 )
 
 const xmlUrl = "https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml"
+const localXml = "./rates.xml"
 
 const (
 	SourceRemote = iota
@@ -128,7 +129,7 @@ save writes data from remote source into file.
 func (e *Extractor) save(data []byte) (int, error) {
 	ratesXml, err := os.OpenFile(e.getFilePath(), os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)
 	if err != nil {
-		return 0, fmt.Errorf("unable to create `./go-grpc-service/rates.xml`. %s", err)
+		return 0, fmt.Errorf("unable to create `%s`. %s", localXml, err)
 	}
 	defer ratesXml.Close()
 
@@ -142,7 +143,6 @@ func (e *Extractor) save(data []byte) (int, error) {
 
 /*
 getFilePath returns absolute path to xml file regarding project directory.
-./go-grpc-service/rates.xml
 */
 func (e *Extractor) getFilePath() string {
 	wd, err := os.Getwd()
@@ -150,7 +150,7 @@ func (e *Extractor) getFilePath() string {
 		panic(err)
 	}
 
-	return filepath.Join(wd, "./../rates.xml")
+	return filepath.Join(wd, localXml)
 }
 
 func (e *Extractor) removeFile() error {
@@ -159,7 +159,7 @@ func (e *Extractor) removeFile() error {
 		return err
 	}
 
-	return os.Remove(filepath.Join(wd, "./../rates.xml"))
+	return os.Remove(filepath.Join(wd, localXml))
 }
 
 func (e *Extractor) isExistFile() bool {

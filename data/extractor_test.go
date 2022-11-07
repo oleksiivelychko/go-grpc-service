@@ -69,7 +69,7 @@ func TestFetchRatesFromLocal(t *testing.T) {
 	}
 
 	if !extractor.isExistFile() {
-		t.Fatalf("local file `./go-grpc-service/rates.xml` doesn't exist")
+		t.Fatalf("local file `%s` doesn't exist", localXml)
 	}
 
 	if extractor.source != SourceLocal {
@@ -85,5 +85,10 @@ func TestFetchRatesFromLocal(t *testing.T) {
 		if parseErr != nil {
 			t.Fatal(parseErr)
 		}
+	}
+
+	err = extractor.removeFile()
+	if err != nil {
+		t.Fatalf(err.Error())
 	}
 }
