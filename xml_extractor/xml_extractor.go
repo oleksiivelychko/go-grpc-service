@@ -153,7 +153,7 @@ func (xmlExtractor *XmlExtractor) getFilePath() string {
 	return filepath.Join(wd, localXml)
 }
 
-func (xmlExtractor *XmlExtractor) removeFile() error {
+func (xmlExtractor *XmlExtractor) RemoveFile() error {
 	wd, err := os.Getwd()
 	if err != nil {
 		return err

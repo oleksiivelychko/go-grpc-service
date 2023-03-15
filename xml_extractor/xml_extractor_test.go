@@ -33,7 +33,7 @@ func TestFetchDataFromLocalFirstTime(t *testing.T) {
 	xmlExtractor := NewXmlExtractor(SourceLocal)
 
 	if xmlExtractor.isExistFile() {
-		err := xmlExtractor.removeFile()
+		err := xmlExtractor.RemoveFile()
 		if err != nil {
 			t.Fatalf(err.Error())
 		}
@@ -87,7 +87,7 @@ func TestFetchDataFromLocal(t *testing.T) {
 		}
 	}
 
-	err = xmlExtractor.removeFile()
+	err = xmlExtractor.RemoveFile()
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
