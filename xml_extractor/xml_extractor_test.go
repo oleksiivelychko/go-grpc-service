@@ -1,27 +1,27 @@
-package data
+package xml_extractor
 
 import (
 	"strconv"
 	"testing"
 )
 
-func TestFetchRatesFromRemote(t *testing.T) {
-	extractor := NewExtractor(SourceRemote)
+func TestFetchDataFromRemote(t *testing.T) {
+	xmlExtractor := NewXmlExtractor(SourceRemote)
 
-	err := extractor.FetchRates()
+	err := xmlExtractor.FetchData()
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
 
-	if extractor.source != SourceRemote {
+	if xmlExtractor.source != SourceRemote {
 		t.Fatal("extracted from non-remote source")
 	}
 
-	if extractor.RootNode.Data.Time == "" {
+	if xmlExtractor.RootNode.Data.Time == "" {
 		t.Fatal("attribute `time` did not extracted from `Cube` element")
 	}
 
-	for _, cube := range extractor.RootNode.Data.Cubes {
+	for _, cube := range xmlExtractor.RootNode.Data.Cubes {
 		_, parseErr := strconv.ParseFloat(cube.Rate, 64)
 		if parseErr != nil {
 			t.Fatal(parseErr)
@@ -29,30 +29,30 @@ func TestFetchRatesFromRemote(t *testing.T) {
 	}
 }
 
-func TestFetchRatesFromLocalFirst(t *testing.T) {
-	extractor := NewExtractor(SourceLocal)
+func TestFetchDataFromLocalFirstTime(t *testing.T) {
+	xmlExtractor := NewXmlExtractor(SourceLocal)
 
-	if extractor.isExistFile() {
-		err := extractor.removeFile()
+	if xmlExtractor.isExistFile() {
+		err := xmlExtractor.removeFile()
 		if err != nil {
 			t.Fatalf(err.Error())
 		}
 	}
 
-	err := extractor.FetchRates()
+	err := xmlExtractor.FetchData()
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
 
-	if extractor.source != SourceRemote {
+	if xmlExtractor.source != SourceRemote {
 		t.Fatal("extracted from non-remote source")
 	}
 
-	if extractor.RootNode.Data.Time == "" {
+	if xmlExtractor.RootNode.Data.Time == "" {
 		t.Fatal("attribute `time` did not extracted from `Cube` element")
 	}
 
-	for _, cube := range extractor.RootNode.Data.Cubes {
+	for _, cube := range xmlExtractor.RootNode.Data.Cubes {
 		_, parseErr := strconv.ParseFloat(cube.Rate, 64)
 		if parseErr != nil {
 			t.Fatal(parseErr)
@@ -60,34 +60,34 @@ func TestFetchRatesFromLocalFirst(t *testing.T) {
 	}
 }
 
-func TestFetchRatesFromLocal(t *testing.T) {
-	extractor := NewExtractor(SourceLocal)
+func TestFetchDataFromLocal(t *testing.T) {
+	xmlExtractor := NewXmlExtractor(SourceLocal)
 
-	err := extractor.FetchRates()
+	err := xmlExtractor.FetchData()
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
 
-	if !extractor.isExistFile() {
+	if !xmlExtractor.isExistFile() {
 		t.Fatalf("local file `%s` doesn't exist", localXml)
 	}
 
-	if extractor.source != SourceLocal {
+	if xmlExtractor.source != SourceLocal {
 		t.Fatal("extracted from non-local source")
 	}
 
-	if extractor.RootNode.Data.Time == "" {
+	if xmlExtractor.RootNode.Data.Time == "" {
 		t.Fatal("attribute `time` did not extracted from `Cube` element")
 	}
 
-	for _, cube := range extractor.RootNode.Data.Cubes {
+	for _, cube := range xmlExtractor.RootNode.Data.Cubes {
 		_, parseErr := strconv.ParseFloat(cube.Rate, 64)
 		if parseErr != nil {
 			t.Fatal(parseErr)
 		}
 	}
 
-	err = extractor.removeFile()
+	err = xmlExtractor.removeFile()
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
