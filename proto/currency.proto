@@ -8,8 +8,7 @@ option go_package = "./grpc_service";
 
 service Currency {
   rpc MakeExchange(ExchangeRequest) returns (ExchangeResponse);
-  // allows a client to subscribe for changes
-  // when the rate changes a response will be sent
+  // allows a client to subscribe for changes when the rate changes a response will be sent
   rpc Subscriber(stream ExchangeRequest) returns (stream StreamExchangeResponse);
 }
 
