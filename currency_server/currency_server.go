@@ -3,8 +3,8 @@ package currency_server
 import (
 	"context"
 	"github.com/hashicorp/go-hclog"
-	ep "github.com/oleksiivelychko/go-grpc-service/exchange_processor"
-	gs "github.com/oleksiivelychko/go-grpc-service/proto/grpc_service"
+	"github.com/oleksiivelychko/go-grpc-service/exchange_processor"
+	"github.com/oleksiivelychko/go-grpc-service/proto/grpc_service"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"io"
@@ -13,13 +13,12 @@ import (
 
 type CurrencyServer struct {
 	logger            hclog.Logger
-	exchangeProcessor *ep.ExchangeProcessor
-	subscribedClients map[gs.Currency_SubscriberServer][]*gs.ExchangeRequest
+	exchangeProcessor *exchange_processor.ExchangeProcessor
+	subscribedClients map[grpc_service.Currency_SubscriberServer][]*grpc_service.ExchangeRequest
 }
 
-func NewCurrencyServer(logger hclog.Logger, exchanger *ep.ExchangeProcessor) *CurrencyServer {
-	exchangeRequests := make(map[gs.Currency_SubscriberServer][]*gs.ExchangeRequest)
-
+func NewCurrencyServer(logger hclog.Logger, exchanger *exchange_processor.ExchangeProcessor) *CurrencyServer {
+	exchangeRequests := make(map[grpc_service.Currency_SubscriberServer][]*grpc_service.ExchangeRequest)
 	currencyServer := &CurrencyServer{logger, exchanger, exchangeRequests}
 
 	go currencyServer.handleUpdates()
@@ -38,12 +37,18 @@ func (currencyServer *CurrencyServer) handleUpdates() {
 
 				rate, err := currencyServer.exchangeProcessor.GetRate(fromCurrency, toCurrency)
 				if err != nil {
-					currencyServer.logger.Error("unable to get update of rate", "from", fromCurrency, "to", toCurrency)
+					currencyServer.logger.Error(
+						"unable to get update of rate",
+						"from",
+						fromCurrency,
+						"to",
+						toCurrency,
+					)
 				}
 
-				err = subscribedClient.Send(&gs.StreamExchangeResponse{
-					Message: &gs.StreamExchangeResponse_ExchangeResponse{
-						ExchangeResponse: &gs.ExchangeResponse{
+				err = subscribedClient.Send(&grpc_service.StreamExchangeResponse{
+					Message: &grpc_service.StreamExchangeResponse_ExchangeResponse{
+						ExchangeResponse: &grpc_service.ExchangeResponse{
 							From:      exchangeRequest.GetFrom(),
 							To:        exchangeRequest.GetTo(),
 							Rate:      rate,
@@ -53,15 +58,32 @@ func (currencyServer *CurrencyServer) handleUpdates() {
 				})
 
 				if err != nil {
-					currencyServer.logger.Error("unable to send updated rate", "from", fromCurrency, "to", toCurrency, "rate", rate)
+					currencyServer.logger.Error(
+						"unable to send updated rate",
+						"from",
+						fromCurrency,
+						"to",
+						toCurrency,
+						"rate",
+						rate,
+					)
 				}
 			}
 		}
 	}
 }
 
-func (currencyServer *CurrencyServer) MakeExchange(_ context.Context, exchangeRequest *gs.ExchangeRequest) (*gs.ExchangeResponse, error) {
-	currencyServer.logger.Info("handle `grpc_service.Currency.MakeExchange`", "from", exchangeRequest.GetFrom(), "to", exchangeRequest.GetTo())
+func (currencyServer *CurrencyServer) MakeExchange(
+	_ context.Context,
+	exchangeRequest *grpc_service.ExchangeRequest,
+) (*grpc_service.ExchangeResponse, error) {
+	currencyServer.logger.Info(
+		"handle `grpc_service.Currency.MakeExchange`",
+		"from",
+		exchangeRequest.GetFrom(),
+		"to",
+		exchangeRequest.GetTo(),
+	)
 
 	if exchangeRequest.GetFrom() == exchangeRequest.GetTo() {
 		grpcErr := status.Newf(
@@ -79,12 +101,15 @@ func (currencyServer *CurrencyServer) MakeExchange(_ context.Context, exchangeRe
 		return nil, grpcStatus.Err()
 	}
 
-	rate, err := currencyServer.exchangeProcessor.GetRate(exchangeRequest.GetFrom().String(), exchangeRequest.GetTo().String())
+	rate, err := currencyServer.exchangeProcessor.GetRate(
+		exchangeRequest.GetFrom().String(),
+		exchangeRequest.GetTo().String(),
+	)
 	if err != nil {
 		currencyServer.logger.Error("cannot get rate", "error", err)
 	}
 
-	return &gs.ExchangeResponse{
+	return &grpc_service.ExchangeResponse{
 		Rate:      rate,
 		From:      exchangeRequest.GetFrom(),
 		To:        exchangeRequest.GetTo(),
@@ -95,7 +120,7 @@ func (currencyServer *CurrencyServer) MakeExchange(_ context.Context, exchangeRe
 /*
 Subscriber implements the gRPC bidirectional streaming method.
 */
-func (currencyServer *CurrencyServer) Subscriber(subscriberServer gs.Currency_SubscriberServer) error {
+func (currencyServer *CurrencyServer) Subscriber(subscriberServer grpc_service.Currency_SubscriberServer) error {
 	// handle client messages
 	for {
 		// 'Recv' is a blocking method which returns on client data.
@@ -110,11 +135,17 @@ func (currencyServer *CurrencyServer) Subscriber(subscriberServer gs.Currency_Su
 			return err
 		}
 
-		currencyServer.logger.Info("handle client request", "From", exchangeRequest.GetFrom(), "To", exchangeRequest.GetTo())
+		currencyServer.logger.Info(
+			"handle client request",
+			"From",
+			exchangeRequest.GetFrom(),
+			"To",
+			exchangeRequest.GetTo(),
+		)
 
 		subscribedClient, ok := currencyServer.subscribedClients[subscriberServer]
 		if !ok {
-			subscribedClient = []*gs.ExchangeRequest{}
+			subscribedClient = []*grpc_service.ExchangeRequest{}
 		}
 
 		var validationErr *status.Status
@@ -138,8 +169,8 @@ func (currencyServer *CurrencyServer) Subscriber(subscriberServer gs.Currency_Su
 		}
 
 		if validationErr != nil {
-			err = subscriberServer.Send(&gs.StreamExchangeResponse{
-				Message: &gs.StreamExchangeResponse_Error{
+			err = subscriberServer.Send(&grpc_service.StreamExchangeResponse{
+				Message: &grpc_service.StreamExchangeResponse_Error{
 					Error: validationErr.Proto(),
 				},
 			})
