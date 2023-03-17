@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestNewExchangeProcessor(t *testing.T) {
+func TestExchangeProcessor_NewExchangeProcessor(t *testing.T) {
 	extractorXML := extractor_xml.NewExtractorXML(extractor_xml.SourceLocal)
 	exchangeProcessor, err := NewExchangeProcessor(extractorXML)
 

@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestFetchDataFromURL(t *testing.T) {
+func TestExtractorXML_FetchDataFromURL(t *testing.T) {
 	extractorXML := NewExtractorXML(SourceURL)
 
 	err := extractorXML.FetchData()
@@ -29,7 +29,7 @@ func TestFetchDataFromURL(t *testing.T) {
 	}
 }
 
-func TestFetchDataFromLocalFirstTime(t *testing.T) {
+func TestExtractorXML_FetchDataFromLocalFirstTime(t *testing.T) {
 	extractorXML := NewExtractorXML(SourceLocal)
 
 	if extractorXML.isExistFile() {
@@ -60,7 +60,7 @@ func TestFetchDataFromLocalFirstTime(t *testing.T) {
 	}
 }
 
-func TestFetchDataFromLocal(t *testing.T) {
+func TestExtractorXML_FetchDataFromLocal(t *testing.T) {
 	xmlExtractor := NewExtractorXML(SourceLocal)
 
 	err := xmlExtractor.FetchData()
