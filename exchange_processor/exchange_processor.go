@@ -2,8 +2,8 @@ package exchange_processor
 
 import (
 	"fmt"
-	gs "github.com/oleksiivelychko/go-grpc-service/proto/grpc_service"
-	xe "github.com/oleksiivelychko/go-grpc-service/xml_extractor"
+	"github.com/oleksiivelychko/go-grpc-service/extractor_xml"
+	"github.com/oleksiivelychko/go-grpc-service/proto/grpc_service"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"math/rand"
 	"strconv"
@@ -12,11 +12,11 @@ import (
 
 type ExchangeProcessor struct {
 	rates        map[string]float64
-	xmlExtractor *xe.XmlExtractor
+	extractorXML *extractor_xml.ExtractorXML
 }
 
-func NewExchangeProcessor(xmlExtractor *xe.XmlExtractor) (*ExchangeProcessor, error) {
-	exchangeProcessor := &ExchangeProcessor{xmlExtractor: xmlExtractor, rates: map[string]float64{}}
+func NewExchangeProcessor(extractorXML *extractor_xml.ExtractorXML) (*ExchangeProcessor, error) {
+	exchangeProcessor := &ExchangeProcessor{extractorXML: extractorXML, rates: map[string]float64{}}
 	err := exchangeProcessor.processRates()
 	return exchangeProcessor, err
 }
@@ -36,21 +36,21 @@ func (exchangeProcessor *ExchangeProcessor) GetRate(fromCurrency, toCurrency str
 }
 
 func (exchangeProcessor *ExchangeProcessor) processRates() error {
-	err := exchangeProcessor.xmlExtractor.FetchData()
+	err := exchangeProcessor.extractorXML.FetchData()
 	if err != nil {
 		return err
 	}
 
-	for _, cube := range exchangeProcessor.xmlExtractor.RootNode.Data.Cubes {
-		rate, parseErr := strconv.ParseFloat(cube.Rate, 64)
-		if parseErr != nil {
-			return fmt.Errorf("cannot parse the rate value `%s` to float. %s", cube.Rate, parseErr)
+	for _, cube := range exchangeProcessor.extractorXML.RootNode.Data.Cubes {
+		rate, parseFloatErr := strconv.ParseFloat(cube.Rate, 64)
+		if parseFloatErr != nil {
+			return fmt.Errorf("unable to parse rate value `%s` to float. %s", cube.Rate, parseFloatErr)
 		}
 
 		exchangeProcessor.rates[cube.Currency] = rate
 	}
 
-	exchangeProcessor.rates[gs.Currencies_EUR.String()] = 1
+	exchangeProcessor.rates[grpc_service.Currencies_EUR.String()] = 1
 
 	return nil
 }
@@ -92,7 +92,7 @@ func (exchangeProcessor *ExchangeProcessor) TrackRates(interval time.Duration) c
 }
 
 func (exchangeProcessor *ExchangeProcessor) GetProtoTimestamp() *timestamppb.Timestamp {
-	createdAt, err := time.Parse("2006-01-02", exchangeProcessor.xmlExtractor.RootNode.Data.Time)
+	createdAt, err := time.Parse("2006-01-02", exchangeProcessor.extractorXML.RootNode.Data.Time)
 	if err != nil {
 		createdAt = timestamppb.Now().AsTime()
 	}

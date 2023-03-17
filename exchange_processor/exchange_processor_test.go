@@ -2,21 +2,21 @@ package exchange_processor
 
 import (
 	"fmt"
-	extractor "github.com/oleksiivelychko/go-grpc-service/xml_extractor"
+	"github.com/oleksiivelychko/go-grpc-service/extractor_xml"
 	"testing"
 )
 
-func TestNewExchanger(t *testing.T) {
-	xmlExtractor := extractor.NewXmlExtractor(extractor.SourceLocal)
-	e, err := NewExchangeProcessor(xmlExtractor)
+func TestNewExchangeProcessor(t *testing.T) {
+	extractorXML := extractor_xml.NewExtractorXML(extractor_xml.SourceLocal)
+	exchangeProcessor, err := NewExchangeProcessor(extractorXML)
 
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
 
-	fmt.Printf("Rates: %#v\n", e.rates)
+	fmt.Printf("Rates: %#v\n", exchangeProcessor.rates)
 
-	err = xmlExtractor.RemoveFile()
+	err = extractorXML.RemoveFile()
 	if err != nil {
 		t.Errorf(err.Error())
 	}
