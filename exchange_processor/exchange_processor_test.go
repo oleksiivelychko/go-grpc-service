@@ -1,4 +1,4 @@
-package exchanger
+package exchange_processor
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 
 func TestNewExchanger(t *testing.T) {
 	xmlExtractor := extractor.NewXmlExtractor(extractor.SourceLocal)
-	e, err := NewExchanger(xmlExtractor)
+	e, err := NewExchangeProcessor(xmlExtractor)
 
 	if err != nil {
 		t.Fatalf(err.Error())
