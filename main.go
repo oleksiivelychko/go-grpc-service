@@ -19,7 +19,7 @@ func main() {
 	grpcServer := grpc.NewServer()
 	reflection.Register(grpcServer)
 
-	extractorXML := extractor_xml.NewExtractorXML(extractor_xml.SourceLocal)
+	extractorXML := extractor_xml.NewExtractorXML(extractor_xml.SourceLocal, "rates.xml")
 	exchangeProcessor, err := exchange_processor.NewExchangeProcessor(extractorXML)
 	if err != nil {
 		hcLogger.Error("unable to create exchangeProcessor", "error", err)
@@ -31,7 +31,7 @@ func main() {
 
 	listenerTCP, err := net.Listen("tcp", localAddr)
 	if err != nil {
-		hcLogger.Error("unable to listenerTCP TCP", "error", err)
+		hcLogger.Error("unable to listen TCP", "error", err)
 		os.Exit(1)
 	}
 

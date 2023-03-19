@@ -2,16 +2,18 @@ package extractor_xml
 
 import (
 	"fmt"
-	"github.com/oleksiivelychko/go-utils/file_ops"
+	"github.com/oleksiivelychko/go-utils/file"
 	"strconv"
 	"testing"
 )
 
-func TestExtractorXML_FetchDataFromLocalFirstTime(t *testing.T) {
-	extractorXML := NewExtractorXML(SourceLocal)
+const localXML = "rates.xml"
 
-	if file_ops.DoesFileExist(localXML) {
-		err := file_ops.DeleteFile(localXML)
+func TestExtractorXML_FetchDataFromLocalFirstTime(t *testing.T) {
+	extractorXML := NewExtractorXML(SourceLocal, localXML)
+
+	if file.DoesFileExist(localXML) {
+		err := file.DeleteFile(localXML)
 		if err != nil {
 			t.Fatalf(err.Error())
 		}
@@ -30,11 +32,11 @@ func TestExtractorXML_FetchDataFromLocalFirstTime(t *testing.T) {
 }
 
 func TestExtractorXML_FetchDataFromLocal(t *testing.T) {
-	if !file_ops.DoesFileExist(localXML) {
+	if !file.DoesFileExist(localXML) {
 		t.Fatalf("file %s doesn't exist", localXML)
 	}
 
-	extractorXML := NewExtractorXML(SourceLocal)
+	extractorXML := NewExtractorXML(SourceLocal, localXML)
 
 	err := extractorXML.FetchData()
 	if err != nil {
@@ -47,14 +49,14 @@ func TestExtractorXML_FetchDataFromLocal(t *testing.T) {
 
 	testData(extractorXML, t)
 
-	err = file_ops.DeleteFile(localXML)
+	err = file.DeleteFile(localXML)
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
 }
 
 func TestExtractorXML_FetchDataFromURL(t *testing.T) {
-	extractorXML := NewExtractorXML(SourceURL)
+	extractorXML := NewExtractorXML(SourceURL, localXML)
 
 	err := extractorXML.FetchData()
 	if err != nil {
@@ -70,7 +72,7 @@ func TestExtractorXML_FetchDataFromURL(t *testing.T) {
 
 func testData(extractorXML *ExtractorXML, t *testing.T) {
 	if extractorXML.RootNode.Data.Time == "" {
-		t.Fatal("attribute `time` couldn't extracted from `Cube` element")
+		t.Fatal("attribute 'time' couldn't be extracted from 'Cube' element")
 	}
 
 	for _, cube := range extractorXML.RootNode.Data.Cubes {
