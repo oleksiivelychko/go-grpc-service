@@ -7,17 +7,16 @@ import (
 )
 
 func TestExchangeProcessor_NewExchangeProcessor(t *testing.T) {
-	extractorXML := extractor_xml.NewExtractorXML(extractor_xml.SourceLocal)
+	extractorXML := extractor_xml.NewExtractorXML(extractor_xml.SourceLocal, "./../rates.xml")
 	exchangeProcessor, err := NewExchangeProcessor(extractorXML)
 
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
 
-	fmt.Printf("Rates: %#v\n", exchangeProcessor.rates)
-
-	err = extractorXML.RemoveFile()
-	if err != nil {
-		t.Errorf(err.Error())
+	if len(exchangeProcessor.rates) == 0 {
+		t.Fatal("unable to process rates")
 	}
+
+	fmt.Printf("Rates: %#v\n", exchangeProcessor.rates)
 }
