@@ -2,13 +2,12 @@ package extractor_xml
 
 import (
 	"encoding/xml"
-	"github.com/oleksiivelychko/go-utils/file_ops"
+	"github.com/oleksiivelychko/go-utils/file"
 	"github.com/oleksiivelychko/go-utils/request_get"
 	"os"
 )
 
 const urlXML = "https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml"
-const localXML = "./rates.xml"
 
 const (
 	SourceURL = iota
@@ -20,6 +19,7 @@ type source int8
 type ExtractorXML struct {
 	RootNode *RootNode
 	source   source
+	localXML string
 }
 
 type RootNode struct {
@@ -36,8 +36,8 @@ type Cube struct {
 	Rate     string `xml:"rate,attr"`
 }
 
-func NewExtractorXML(src source) *ExtractorXML {
-	return &ExtractorXML{&RootNode{}, src}
+func NewExtractorXML(src source, localXML string) *ExtractorXML {
+	return &ExtractorXML{&RootNode{}, src, localXML}
 }
 
 func (extractorXML *ExtractorXML) FetchData() error {
@@ -67,8 +67,8 @@ func (extractorXML *ExtractorXML) decodeFromURL() error {
 func (extractorXML *ExtractorXML) readFromLocal() (err error) {
 	var bytes []byte
 
-	if file_ops.DoesFileExist(localXML) {
-		bytes, err = os.ReadFile(localXML)
+	if file.DoesFileExist(extractorXML.localXML) {
+		bytes, err = os.ReadFile(extractorXML.localXML)
 		if err != nil {
 			return err
 		}
@@ -78,7 +78,10 @@ func (extractorXML *ExtractorXML) readFromLocal() (err error) {
 			return err
 		}
 		extractorXML.source = SourceURL
-		_, err = file_ops.SaveToFile(localXML, bytes)
+		_, err = file.SaveToFile(extractorXML.localXML, bytes)
+		if err != nil {
+			return err
+		}
 	}
 
 	return xml.Unmarshal(bytes, &extractorXML.RootNode)
