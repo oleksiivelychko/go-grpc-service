@@ -123,7 +123,7 @@ Subscriber implements the gRPC bidirectional streaming method.
 func (currencyServer *CurrencyServer) Subscriber(subscriberServer grpc_service.Currency_SubscriberServer) error {
 	// handle client messages
 	for {
-		// 'Recv' is a blocking method which returns on client data.
+		// 'Recv' is a blocking method which returns on client data
 		exchangeRequest, err := subscriberServer.Recv()
 		if err == io.EOF {
 			currencyServer.logger.Error("client has closed the connection")
@@ -161,7 +161,7 @@ func (currencyServer *CurrencyServer) Subscriber(subscriberServer grpc_service.C
 				)
 
 				if validationErr, err = validationErr.WithDetails(exchangeRequest); err != nil {
-					currencyServer.logger.Error("unable to original request as metadata", "error", err)
+					currencyServer.logger.Error("unable to get original request as metadata", "error", err)
 				}
 
 				break
