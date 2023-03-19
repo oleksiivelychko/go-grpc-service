@@ -24,12 +24,12 @@ func NewExchangeProcessor(extractorXML *extractor_xml.ExtractorXML) (*ExchangePr
 func (exchangeProcessor *ExchangeProcessor) GetRate(fromCurrency, toCurrency string) (float64, error) {
 	rateFromCurrency, ok := exchangeProcessor.rates[fromCurrency]
 	if !ok {
-		return 0, fmt.Errorf("rate not found for base [from] currency %s", fromCurrency)
+		return 0, fmt.Errorf("rate not found for base [from] '%s' currency", fromCurrency)
 	}
 
 	rateToCurrency, ok := exchangeProcessor.rates[toCurrency]
 	if !ok {
-		return 0, fmt.Errorf("rate not found for destination [to] currency %s", toCurrency)
+		return 0, fmt.Errorf("rate not found for destination [to] '%s' currency", toCurrency)
 	}
 
 	return rateFromCurrency / rateToCurrency, nil
@@ -44,7 +44,7 @@ func (exchangeProcessor *ExchangeProcessor) processRates() error {
 	for _, cube := range exchangeProcessor.extractorXML.RootNode.Data.Cubes {
 		rate, parseFloatErr := strconv.ParseFloat(cube.Rate, 64)
 		if parseFloatErr != nil {
-			return fmt.Errorf("unable to parse rate value `%s` to float. %s", cube.Rate, parseFloatErr)
+			return fmt.Errorf("unable to parse rate value '%s' to float: %s", cube.Rate, parseFloatErr)
 		}
 
 		exchangeProcessor.rates[cube.Currency] = rate
