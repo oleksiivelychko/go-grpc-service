@@ -28,4 +28,4 @@ grpcurl --plaintext --msg-template -d @ localhost:9091 grpc_service.Currency.Sub
 }
 ```
 
-🎥 Thanks <a href="https://www.youtube.com/c/NicJackson">Nic Jackson</a> for sharing his knowledge.
+🎥 Thanks [Nic Jackson](https://www.youtube.com/c/NicJackson) for sharing his knowledge.
