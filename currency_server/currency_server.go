@@ -78,7 +78,7 @@ func (currencyServer *CurrencyServer) MakeExchange(
 	exchangeRequest *grpc_service.ExchangeRequest,
 ) (*grpc_service.ExchangeResponse, error) {
 	currencyServer.logger.Info(
-		"handle `grpc_service.Currency.MakeExchange`",
+		"handle 'grpc_service.Currency.MakeExchange'",
 		"from",
 		exchangeRequest.GetFrom(),
 		"to",
