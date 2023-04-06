@@ -1,10 +1,10 @@
 syntax = "proto3";
-package grpc_service;
+package grpcservice;
 
 import "google/protobuf/timestamp.proto";
 import "proto/google/rpc/status.proto";
 
-option go_package = "./grpc_service";
+option go_package = "./grpcservice";
 
 service Currency {
   rpc MakeExchange(ExchangeRequest) returns (ExchangeResponse);
