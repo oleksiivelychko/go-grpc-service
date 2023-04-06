@@ -1,4 +1,4 @@
-package processor
+package exchanger
 
 import (
 	"fmt"
@@ -10,24 +10,24 @@ import (
 	"time"
 )
 
-type Exchanger struct {
-	rates     map[string]float64
-	pullerXML *extractor.PullerXML
+type Processor struct {
+	rates  map[string]float64
+	puller *extractor.PullerXML
 }
 
-func NewExchanger(pullerXML *extractor.PullerXML) (*Exchanger, error) {
-	exchanger := &Exchanger{pullerXML: pullerXML, rates: map[string]float64{}}
-	err := exchanger.processRates()
-	return exchanger, err
+func NewProcessor(pullerXML *extractor.PullerXML) (*Processor, error) {
+	processor := &Processor{puller: pullerXML, rates: map[string]float64{}}
+	err := processor.processRates()
+	return processor, err
 }
 
-func (exchanger *Exchanger) GetRate(fromCurrency, toCurrency string) (float64, error) {
-	rateFromCurrency, ok := exchanger.rates[fromCurrency]
+func (processor *Processor) GetRate(fromCurrency, toCurrency string) (float64, error) {
+	rateFromCurrency, ok := processor.rates[fromCurrency]
 	if !ok {
 		return 0, fmt.Errorf("rate not found for base [from] %s currency", fromCurrency)
 	}
 
-	rateToCurrency, ok := exchanger.rates[toCurrency]
+	rateToCurrency, ok := processor.rates[toCurrency]
 	if !ok {
 		return 0, fmt.Errorf("rate not found for destination [to] %s currency", toCurrency)
 	}
@@ -35,22 +35,22 @@ func (exchanger *Exchanger) GetRate(fromCurrency, toCurrency string) (float64, e
 	return rateFromCurrency / rateToCurrency, nil
 }
 
-func (exchanger *Exchanger) processRates() error {
-	err := exchanger.pullerXML.FetchData()
+func (processor *Processor) processRates() error {
+	err := processor.puller.FetchData()
 	if err != nil {
 		return err
 	}
 
-	for _, cube := range exchanger.pullerXML.RootNode.Data.Cubes {
+	for _, cube := range processor.puller.RootNode.Data.Cubes {
 		rate, parseFloatErr := strconv.ParseFloat(cube.Rate, 64)
 		if parseFloatErr != nil {
 			return fmt.Errorf("unable to parse rate value %s to float: %s", cube.Rate, parseFloatErr)
 		}
 
-		exchanger.rates[cube.Currency] = rate
+		processor.rates[cube.Currency] = rate
 	}
 
-	exchanger.rates[grpcservice.Currencies_EUR.String()] = 1
+	processor.rates[grpcservice.Currencies_EUR.String()] = 1
 
 	return nil
 }
@@ -59,7 +59,7 @@ func (exchanger *Exchanger) processRates() error {
 TrackRates sends message to the channel when rates are changed.
 Fake simulation process, the local development use only.
 */
-func (exchanger *Exchanger) TrackRates(interval time.Duration) chan struct{} {
+func (processor *Processor) TrackRates(interval time.Duration) chan struct{} {
 	ch := make(chan struct{})
 
 	go func() {
@@ -67,7 +67,7 @@ func (exchanger *Exchanger) TrackRates(interval time.Duration) chan struct{} {
 		for {
 			select {
 			case <-ticker.C:
-				for currency, rate := range exchanger.rates {
+				for currency, rate := range processor.rates {
 					// can be 10% of original value
 					change := rand.Float64() / 10
 					isPositive := rand.Intn(1)
@@ -79,7 +79,7 @@ func (exchanger *Exchanger) TrackRates(interval time.Duration) chan struct{} {
 						change = 1 + change
 					}
 
-					exchanger.rates[currency] = rate * change
+					processor.rates[currency] = rate * change
 				}
 
 				// notify updates, this will block unless there is a listener on the other end
@@ -91,8 +91,8 @@ func (exchanger *Exchanger) TrackRates(interval time.Duration) chan struct{} {
 	return ch
 }
 
-func (exchanger *Exchanger) GetProtoTimestamp() *timestamppb.Timestamp {
-	createdAt, err := time.Parse("2006-01-02", exchanger.pullerXML.RootNode.Data.Time)
+func (processor *Processor) GetProtoTimestamp() *timestamppb.Timestamp {
+	createdAt, err := time.Parse("2006-01-02", processor.puller.RootNode.Data.Time)
 	if err != nil {
 		createdAt = timestamppb.Now().AsTime()
 	}

@@ -1,4 +1,4 @@
-package processor
+package exchanger
 
 import (
 	"github.com/oleksiivelychko/go-grpc-service/extractor"
@@ -7,7 +7,7 @@ import (
 
 func TestProcessor_NewExchanger(t *testing.T) {
 	pullerXML := extractor.NewPullerXML(extractor.SourceLocal, "./../rates.xml")
-	exchanger, err := NewExchanger(pullerXML)
+	exchanger, err := NewProcessor(pullerXML)
 
 	if err != nil {
 		t.Fatalf(err.Error())
