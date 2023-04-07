@@ -33,9 +33,9 @@ func main() {
 		os.Exit(1)
 	}
 
-	hcLogger.Info("starting gRPC exchangerServer", "listening", server.EnvAddress())
+	hcLogger.Info("starting gRPC server", "listening", server.EnvAddress())
 	if err = grpcServer.Serve(listenerTCP); err != nil {
-		hcLogger.Error("unable to start gRPC exchangerServer", "error", err)
+		hcLogger.Error("unable to start gRPC server", "error", err)
 		os.Exit(1)
 	}
 }
