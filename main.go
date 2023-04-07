@@ -1,43 +1,41 @@
 package main
 
 import (
-	"github.com/oleksiivelychko/go-grpc-service/currency_server"
-	"github.com/oleksiivelychko/go-grpc-service/exchange_processor"
-	"github.com/oleksiivelychko/go-grpc-service/extractor_xml"
-	"github.com/oleksiivelychko/go-grpc-service/proto/grpc_service"
+	"github.com/oleksiivelychko/go-grpc-service/exchanger"
+	"github.com/oleksiivelychko/go-grpc-service/extractor"
+	"github.com/oleksiivelychko/go-grpc-service/proto/grpcservice"
 	"github.com/oleksiivelychko/go-utils/logger"
+	"github.com/oleksiivelychko/go-utils/server"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 	"net"
 	"os"
 )
 
-const localAddr = "localhost:9091"
-
 func main() {
-	hcLogger := logger.NewLogger("go-grpc-service")
+	hcLogger := logger.NewHashicorp("go-grpc-service")
 	grpcServer := grpc.NewServer()
 	reflection.Register(grpcServer)
 
-	extractorXML := extractor_xml.NewExtractorXML(extractor_xml.SourceLocal, "rates.xml")
-	exchangeProcessor, err := exchange_processor.NewExchangeProcessor(extractorXML)
+	pullerXML := extractor.NewPullerXML(extractor.SourceLocal, "rates.xml")
+	processor, err := exchanger.NewProcessor(pullerXML)
 	if err != nil {
-		hcLogger.Error("unable to create exchangeProcessor", "error", err)
+		hcLogger.Error("unable to create processor", "error", err)
 		os.Exit(1)
 	}
 
-	currencyServer := currency_server.NewCurrencyServer(hcLogger, exchangeProcessor)
-	grpc_service.RegisterCurrencyServer(grpcServer, currencyServer)
+	exchangerServer := exchanger.NewServer(hcLogger, processor)
+	grpcservice.RegisterExchangerServer(grpcServer, exchangerServer)
 
-	listenerTCP, err := net.Listen("tcp", localAddr)
+	listenerTCP, err := net.Listen("tcp", server.EnvAddress())
 	if err != nil {
 		hcLogger.Error("unable to listen TCP", "error", err)
 		os.Exit(1)
 	}
 
-	hcLogger.Info("starting gRPC server", "listening", localAddr)
+	hcLogger.Info("starting gRPC exchangerServer", "listening", server.EnvAddress())
 	if err = grpcServer.Serve(listenerTCP); err != nil {
-		hcLogger.Error("unable to start gRPC server", "error", err)
+		hcLogger.Error("unable to start gRPC exchangerServer", "error", err)
 		os.Exit(1)
 	}
 }
