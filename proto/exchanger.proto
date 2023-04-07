@@ -6,7 +6,7 @@ import "proto/google/rpc/status.proto";
 
 option go_package = "./grpcservice";
 
-service Currency {
+service Exchanger {
   rpc MakeExchange(ExchangeRequest) returns (ExchangeResponse);
   // allows a client to subscribe for changes when the rate changes a response will be sent
   rpc Subscriber(stream ExchangeRequest) returns (stream StreamExchangeResponse);
