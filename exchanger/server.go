@@ -2,11 +2,13 @@ package exchanger
 
 import (
 	"context"
+	"fmt"
 	"github.com/hashicorp/go-hclog"
 	"github.com/oleksiivelychko/go-grpc-service/proto/grpcservice"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"io"
+	"os"
 	"time"
 )
 
@@ -184,6 +186,10 @@ func (server *Server) Subscriber(subscriberServer grpcservice.Exchanger_Subscrib
 	}
 
 	return nil
+}
+
+func (server *Server) EnvAddress() string {
+	return fmt.Sprintf("%s:%s", os.Getenv("HOST"), os.Getenv("PORT"))
 }
 
 /*
