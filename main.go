@@ -1,10 +1,10 @@
 package main
 
 import (
+	"github.com/hashicorp/go-hclog"
 	"github.com/oleksiivelychko/go-grpc-service/exchanger"
 	"github.com/oleksiivelychko/go-grpc-service/extractor"
 	"github.com/oleksiivelychko/go-grpc-service/proto/grpcservice"
-	"github.com/oleksiivelychko/go-utils/logger"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 	"net"
@@ -12,12 +12,18 @@ import (
 )
 
 func main() {
-	hcLogger := logger.NewHashicorp("go-grpc-service")
+	hcLogger := hclog.New(&hclog.LoggerOptions{
+		Name:       "go-grpc-service",
+		Level:      hclog.LevelFromString("DEBUG"),
+		Color:      1,
+		TimeFormat: "02/01/2006 15:04:05",
+	})
+
 	grpcServer := grpc.NewServer()
 	reflection.Register(grpcServer)
 
-	pullerXML := extractor.NewPullerXML(extractor.SourceLocal, "rates.xml")
-	processor, err := exchanger.NewProcessor(pullerXML)
+	puller := extractor.New(extractor.SourceLocal, "rates.xml")
+	processor, err := exchanger.NewProcessor(puller)
 	if err != nil {
 		hcLogger.Error("unable to create processor", "error", err)
 		os.Exit(1)

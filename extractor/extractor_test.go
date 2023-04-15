@@ -1,7 +1,7 @@
 package extractor
 
 import (
-	"github.com/oleksiivelychko/go-utils/system"
+	"github.com/oleksiivelychko/go-grpc-service/utils"
 	"os"
 	"strconv"
 	"testing"
@@ -10,9 +10,9 @@ import (
 const localXML = "rates.xml"
 
 func TestExtractor_TryToPullDataFromLocalXML(t *testing.T) {
-	puller := NewPullerXML(SourceLocal, localXML)
+	puller := New(SourceLocal, localXML)
 
-	if system.IsPathValid(localXML) {
+	if utils.IsPathValid(localXML) {
 		err := os.Remove(localXML)
 		if err != nil {
 			t.Fatalf(err.Error())
@@ -32,11 +32,11 @@ func TestExtractor_TryToPullDataFromLocalXML(t *testing.T) {
 }
 
 func TestExtractor_PullDataFromLocalXML(t *testing.T) {
-	if !system.IsPathValid(localXML) {
+	if !utils.IsPathValid(localXML) {
 		t.Fatalf("file %s does not exist", localXML)
 	}
 
-	puller := NewPullerXML(SourceLocal, localXML)
+	puller := New(SourceLocal, localXML)
 
 	err := puller.FetchData()
 	if err != nil {
@@ -56,7 +56,7 @@ func TestExtractor_PullDataFromLocalXML(t *testing.T) {
 }
 
 func TestExtractor_PullDataFromURL(t *testing.T) {
-	puller := NewPullerXML(SourceURL, localXML)
+	puller := New(SourceURL, localXML)
 
 	err := puller.FetchData()
 	if err != nil {
@@ -70,7 +70,7 @@ func TestExtractor_PullDataFromURL(t *testing.T) {
 	testData(puller, t)
 }
 
-func testData(puller *PullerXML, t *testing.T) {
+func testData(puller *XML, t *testing.T) {
 	if puller.RootNode.Data.Time == "" {
 		t.Fatal("attribute 'time' could not be extracted from 'Cube' element")
 	}

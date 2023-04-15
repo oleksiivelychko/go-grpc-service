@@ -12,10 +12,10 @@ import (
 
 type Processor struct {
 	rates  map[string]float64
-	puller *extractor.PullerXML
+	puller *extractor.XML
 }
 
-func NewProcessor(pullerXML *extractor.PullerXML) (*Processor, error) {
+func NewProcessor(pullerXML *extractor.XML) (*Processor, error) {
 	processor := &Processor{puller: pullerXML, rates: map[string]float64{}}
 	err := processor.processRates()
 	return processor, err

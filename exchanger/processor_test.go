@@ -6,8 +6,8 @@ import (
 )
 
 func TestProcessor_NewExchanger(t *testing.T) {
-	pullerXML := extractor.NewPullerXML(extractor.SourceLocal, "./../rates.xml")
-	exchanger, err := NewProcessor(pullerXML)
+	puller := extractor.New(extractor.SourceLocal, "./../rates.xml")
+	exchanger, err := NewProcessor(puller)
 
 	if err != nil {
 		t.Fatalf(err.Error())
