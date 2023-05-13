@@ -1,7 +1,7 @@
 package extractor
 
 import (
-	"github.com/oleksiivelychko/go-grpc-service/utils"
+	"github.com/oleksiivelychko/go-code-helpers/system"
 	"os"
 	"strconv"
 	"testing"
@@ -12,7 +12,7 @@ const localXML = "rates.xml"
 func TestExtractor_TryToPullDataFromLocalXML(t *testing.T) {
 	puller := New(SourceLocal, localXML)
 
-	if utils.IsPathValid(localXML) {
+	if system.IsPathValid(localXML) {
 		err := os.Remove(localXML)
 		if err != nil {
 			t.Fatalf(err.Error())
@@ -32,7 +32,7 @@ func TestExtractor_TryToPullDataFromLocalXML(t *testing.T) {
 }
 
 func TestExtractor_PullDataFromLocalXML(t *testing.T) {
-	if !utils.IsPathValid(localXML) {
+	if !system.IsPathValid(localXML) {
 		t.Fatalf("file %s does not exist", localXML)
 	}
 
