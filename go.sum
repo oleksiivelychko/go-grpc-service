@@ -20,6 +20,14 @@ github.com/mattn/go-isatty v0.0.14/go.mod h1:7GGIvUiUoEMVVmxf/4nioHXj79iQHKdU27k
 github.com/mattn/go-isatty v0.0.16/go.mod h1:kYGgaQfpe5nmfYZH+SKPsOc2e4SrIfOl2e/yFXSvRLM=
 github.com/mattn/go-isatty v0.0.18 h1:DOKFKCQ7FNG2L1rbrmstDN4QVRdS89Nkh85u68Uwp98=
 github.com/mattn/go-isatty v0.0.18/go.mod h1:W+V8PltTTMOvKvAeJH7IuucS94S2C6jfK/D7dTCTo3Y=
+github.com/oleksiivelychko/go-code-helpers v0.0.0-20230513105626-b7224f24d350 h1:hWo0fK+iOfKPKbgbGJDSrM8IAFHOpNUYbDpkm5PX3KM=
+github.com/oleksiivelychko/go-code-helpers v0.0.0-20230513105626-b7224f24d350/go.mod h1:JLV0zEv6LZcyGfarfHMwMLY10Lzgq69phCaSmY/2D40=
+github.com/oleksiivelychko/go-code-helpers v0.0.0-20230513120755-9931a141d3a0 h1:Ge9UpCTRIb97oVtRl/CViy5/qtde8TUOXWjsudAwbQg=
+github.com/oleksiivelychko/go-code-helpers v0.0.0-20230513120755-9931a141d3a0/go.mod h1:JLV0zEv6LZcyGfarfHMwMLY10Lzgq69phCaSmY/2D40=
+github.com/oleksiivelychko/go-code-helpers v0.0.0-20230513122332-1390dd49909f h1:27BMf2EhfdwE+hcgL3ACCMi1Vyg1H9ZwIeE5HQ9E5bA=
+github.com/oleksiivelychko/go-code-helpers v0.0.0-20230513122332-1390dd49909f/go.mod h1:JLV0zEv6LZcyGfarfHMwMLY10Lzgq69phCaSmY/2D40=
+github.com/oleksiivelychko/go-code-helpers v0.0.0-20230513175952-0bcc756563fe h1:AVBiK7Uur/x9HshgtMeop80dq0w/QSzwDkZ9wnnrtow=
+github.com/oleksiivelychko/go-code-helpers v0.0.0-20230513175952-0bcc756563fe/go.mod h1:JLV0zEv6LZcyGfarfHMwMLY10Lzgq69phCaSmY/2D40=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
