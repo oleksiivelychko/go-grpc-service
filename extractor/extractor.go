@@ -2,9 +2,9 @@ package extractor
 
 import (
 	"encoding/xml"
-	"github.com/oleksiivelychko/go-grpc-service/utils"
-	"github.com/oleksiivelychko/go-grpc-service/utils/request"
-	"github.com/oleksiivelychko/go-grpc-service/utils/writer"
+	"fmt"
+	"github.com/oleksiivelychko/go-code-helpers/system"
+	"io"
 	"net/http"
 	"os"
 )
@@ -70,23 +70,54 @@ func (extractor *XML) decodeFromURL() error {
 func (extractor *XML) readFromLocal() (err error) {
 	var bytesArr []byte
 
-	if utils.IsPathValid(extractor.localXML) {
+	if system.IsPathValid(extractor.localXML) {
 		bytesArr, err = os.ReadFile(extractor.localXML)
 		if err != nil {
 			return err
 		}
 	} else {
-		bytesArr, err = request.GET(urlXML)
+		extractor.source = SourceURL
+
+		bytesArr, err = extractor.readURL()
 		if err != nil {
 			return err
 		}
-		extractor.source = SourceURL
 
-		_, err = writer.ToFile(extractor.localXML, bytesArr)
+		err = os.WriteFile(extractor.localXML, bytesArr, 0644)
 		if err != nil {
 			return err
 		}
 	}
 
 	return xml.Unmarshal(bytesArr, &extractor.RootNode)
+}
+
+func (extractor *XML) readURL() ([]byte, error) {
+	resp, err := http.DefaultClient.Get(urlXML)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return []byte{}, fmt.Errorf("got unsuccessful status code %d", resp.StatusCode)
+	}
+
+	if err != nil {
+		return []byte{}, err
+	}
+
+	defer func(b io.ReadCloser) {
+		_ = b.Close()
+	}(resp.Body)
+
+	bytesArr, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	if len(bytesArr) == 0 {
+		return []byte{}, fmt.Errorf("response body is empty")
+	}
+
+	return bytesArr, nil
 }
