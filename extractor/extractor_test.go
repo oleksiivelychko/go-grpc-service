@@ -1,7 +1,7 @@
 package extractor
 
 import (
-	"github.com/oleksiivelychko/go-code-helpers/system"
+	"errors"
 	"os"
 	"strconv"
 	"testing"
@@ -12,8 +12,8 @@ const localXML = "rates.xml"
 func TestExtractor_TryToPullDataFromLocalXML(t *testing.T) {
 	puller := New(SourceLocal, localXML)
 
-	if system.IsPathValid(localXML) {
-		err := os.Remove(localXML)
+	if _, err := os.Stat(localXML); !errors.Is(err, os.ErrNotExist) {
+		err = os.Remove(localXML)
 		if err != nil {
 			t.Fatalf(err.Error())
 		}
@@ -32,8 +32,8 @@ func TestExtractor_TryToPullDataFromLocalXML(t *testing.T) {
 }
 
 func TestExtractor_PullDataFromLocalXML(t *testing.T) {
-	if !system.IsPathValid(localXML) {
-		t.Fatalf("file %s does not exist", localXML)
+	if _, err := os.Stat(localXML); errors.Is(err, os.ErrNotExist) {
+		t.Fatal(err)
 	}
 
 	puller := New(SourceLocal, localXML)

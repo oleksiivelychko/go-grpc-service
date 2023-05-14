@@ -2,8 +2,8 @@ package extractor
 
 import (
 	"encoding/xml"
+	"errors"
 	"fmt"
-	"github.com/oleksiivelychko/go-code-helpers/system"
 	"io"
 	"net/http"
 	"os"
@@ -70,7 +70,7 @@ func (extractor *XML) decodeFromURL() error {
 func (extractor *XML) readFromLocal() (err error) {
 	var bytesArr []byte
 
-	if system.IsPathValid(extractor.localXML) {
+	if _, err = os.Stat(extractor.localXML); !errors.Is(err, os.ErrNotExist) {
 		bytesArr, err = os.ReadFile(extractor.localXML)
 		if err != nil {
 			return err
