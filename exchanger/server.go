@@ -23,11 +23,13 @@ func NewServer(logger hclog.Logger, processor *Processor) *Server {
 	server := &Server{logger, processor, requests}
 
 	go server.handleUpdates()
+
 	return server
 }
 
 func (server *Server) handleUpdates() {
 	updates := server.processor.TrackRates(5 * time.Second)
+
 	for range updates {
 		server.logger.Info("handling updates...")
 
@@ -74,7 +76,11 @@ func (server *Server) handleUpdates() {
 	}
 }
 
-func (server *Server) MakeExchange(_ context.Context, exchangeRequest *grpcservice.ExchangeRequest) (*grpcservice.ExchangeResponse, error) {
+func (server *Server) MakeExchange(
+	_ context.Context,
+	exchangeRequest *grpcservice.ExchangeRequest,
+) (*grpcservice.ExchangeResponse, error) {
+
 	server.logger.Info(
 		"handle 'grpcservice.Exchanger.MakeExchange'",
 		"from",
@@ -86,7 +92,7 @@ func (server *Server) MakeExchange(_ context.Context, exchangeRequest *grpcservi
 	if exchangeRequest.GetFrom() == exchangeRequest.GetTo() {
 		grpcErr := status.Newf(
 			codes.InvalidArgument,
-			"base currency %s cannot be the same as destination %s",
+			"base currency %s cannot be equal to destination %s",
 			exchangeRequest.GetFrom(),
 			exchangeRequest.GetTo(),
 		)
