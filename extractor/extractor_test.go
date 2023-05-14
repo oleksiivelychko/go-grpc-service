@@ -9,8 +9,8 @@ import (
 
 const localXML = "rates.xml"
 
-func TestExtractor_TryToPullDataFromLocalXML(t *testing.T) {
-	puller := New(SourceLocal, localXML)
+func TestExtractor_TryToExtractDataFromLocalXML(t *testing.T) {
+	extractor := New(SourceLocal, localXML)
 
 	if _, err := os.Stat(localXML); !errors.Is(err, os.ErrNotExist) {
 		err = os.Remove(localXML)
@@ -19,35 +19,35 @@ func TestExtractor_TryToPullDataFromLocalXML(t *testing.T) {
 		}
 	}
 
-	err := puller.FetchData()
+	err := extractor.FetchData()
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
 
-	if puller.source != SourceURL {
-		t.Fatal("source does not equal to SourceURL")
+	if extractor.source != SourceURL {
+		t.Fatal("source is not equal to SourceURL")
 	}
 
-	testData(puller, t)
+	testData(extractor, t)
 }
 
-func TestExtractor_PullDataFromLocalXML(t *testing.T) {
+func TestExtractor_ExtractDataFromLocalXML(t *testing.T) {
 	if _, err := os.Stat(localXML); errors.Is(err, os.ErrNotExist) {
 		t.Fatal(err)
 	}
 
-	puller := New(SourceLocal, localXML)
+	extractor := New(SourceLocal, localXML)
 
-	err := puller.FetchData()
+	err := extractor.FetchData()
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
 
-	if puller.source != SourceLocal {
-		t.Fatal("source does not equal to SourceURL")
+	if extractor.source != SourceLocal {
+		t.Fatal("source is not equal to SourceURL")
 	}
 
-	testData(puller, t)
+	testData(extractor, t)
 
 	err = os.Remove(localXML)
 	if err != nil {
@@ -55,27 +55,27 @@ func TestExtractor_PullDataFromLocalXML(t *testing.T) {
 	}
 }
 
-func TestExtractor_PullDataFromURL(t *testing.T) {
-	puller := New(SourceURL, localXML)
+func TestExtractor_ExtractDataFromURL(t *testing.T) {
+	extractor := New(SourceURL, localXML)
 
-	err := puller.FetchData()
+	err := extractor.FetchData()
 	if err != nil {
 		t.Fatal(err.Error())
 	}
 
-	if puller.source != SourceURL {
-		t.Fatal("source does not equal to SourceURL")
+	if extractor.source != SourceURL {
+		t.Fatal("source is not equal to SourceURL")
 	}
 
-	testData(puller, t)
+	testData(extractor, t)
 }
 
-func testData(puller *XML, t *testing.T) {
-	if puller.RootNode.Data.Time == "" {
+func testData(extractor *XML, t *testing.T) {
+	if extractor.RootNode.Data.Time == "" {
 		t.Fatal("attribute 'time' could not be extracted from 'Cube' element")
 	}
 
-	for _, cube := range puller.RootNode.Data.Cubes {
+	for _, cube := range extractor.RootNode.Data.Cubes {
 		rate, parseFloatErr := strconv.ParseFloat(cube.Rate, 64)
 		if parseFloatErr != nil {
 			t.Error(parseFloatErr)
