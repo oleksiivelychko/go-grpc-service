@@ -99,7 +99,7 @@ func (extractor *XML) readURL() ([]byte, error) {
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return []byte{}, fmt.Errorf("got unsuccessful status code %d", resp.StatusCode)
+		return []byte{}, fmt.Errorf("got %d status code", resp.StatusCode)
 	}
 
 	if err != nil {
