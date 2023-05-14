@@ -11,13 +11,14 @@ import (
 )
 
 type Processor struct {
-	rates  map[string]float64
-	puller *extractor.XML
+	rates     map[string]float64
+	extractor *extractor.XML
 }
 
-func NewProcessor(pullerXML *extractor.XML) (*Processor, error) {
-	processor := &Processor{puller: pullerXML, rates: map[string]float64{}}
+func NewProcessor(extractor *extractor.XML) (*Processor, error) {
+	processor := &Processor{extractor: extractor, rates: map[string]float64{}}
 	err := processor.processRates()
+
 	return processor, err
 }
 
@@ -36,12 +37,12 @@ func (processor *Processor) GetRate(fromCurrency, toCurrency string) (float64, e
 }
 
 func (processor *Processor) processRates() error {
-	err := processor.puller.FetchData()
+	err := processor.extractor.FetchData()
 	if err != nil {
 		return err
 	}
 
-	for _, cube := range processor.puller.RootNode.Data.Cubes {
+	for _, cube := range processor.extractor.RootNode.Data.Cubes {
 		rate, parseFloatErr := strconv.ParseFloat(cube.Rate, 64)
 		if parseFloatErr != nil {
 			return fmt.Errorf("unable to parse rate value %s to float: %s", cube.Rate, parseFloatErr)
@@ -92,7 +93,7 @@ func (processor *Processor) TrackRates(interval time.Duration) chan struct{} {
 }
 
 func (processor *Processor) GetProtoTimestamp() *timestamppb.Timestamp {
-	createdAt, err := time.Parse("2006-01-02", processor.puller.RootNode.Data.Time)
+	createdAt, err := time.Parse("2006-01-02", processor.extractor.RootNode.Data.Time)
 	if err != nil {
 		createdAt = timestamppb.Now().AsTime()
 	}
