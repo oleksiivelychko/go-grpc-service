@@ -22,8 +22,8 @@ func main() {
 	grpcServer := grpc.NewServer()
 	reflection.Register(grpcServer)
 
-	puller := extractor.New(extractor.SourceLocal, "rates.xml")
-	processor, err := exchanger.NewProcessor(puller)
+	extractorXML := extractor.New(extractor.SourceLocal, "rates.xml")
+	processor, err := exchanger.NewProcessor(extractorXML)
 	if err != nil {
 		hcLogger.Error("unable to create processor", "error", err)
 		os.Exit(1)
