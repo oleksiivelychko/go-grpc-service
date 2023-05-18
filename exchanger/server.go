@@ -3,7 +3,7 @@ package exchanger
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/go-hclog"
+	"github.com/oleksiivelychko/go-grpc-service/logger"
 	"github.com/oleksiivelychko/go-grpc-service/proto/grpcservice"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -13,14 +13,14 @@ import (
 )
 
 type Server struct {
-	logger            hclog.Logger
 	processor         *Processor
 	subscribedClients map[grpcservice.Exchanger_SubscriberServer][]*grpcservice.ExchangeRequest
+	logger            *logger.Logger
 }
 
-func NewServer(logger hclog.Logger, processor *Processor) *Server {
+func NewServer(processor *Processor, logger *logger.Logger) *Server {
 	requests := make(map[grpcservice.Exchanger_SubscriberServer][]*grpcservice.ExchangeRequest)
-	server := &Server{logger, processor, requests}
+	server := &Server{processor, requests, logger}
 
 	go server.handleUpdates()
 
@@ -40,13 +40,7 @@ func (server *Server) handleUpdates() {
 
 				rate, err := server.processor.GetRate(fromCurrency, toCurrency)
 				if err != nil {
-					server.logger.Error(
-						"unable to get update of rate",
-						"from",
-						fromCurrency,
-						"to",
-						toCurrency,
-					)
+					server.logger.Error("unable to get update of rate, from=%s to=%s", fromCurrency, toCurrency)
 				}
 
 				err = subscribedClient.Send(&grpcservice.StreamExchangeResponse{
@@ -61,15 +55,7 @@ func (server *Server) handleUpdates() {
 				})
 
 				if err != nil {
-					server.logger.Error(
-						"unable to send updated rate",
-						"from",
-						fromCurrency,
-						"to",
-						toCurrency,
-						"rate",
-						rate,
-					)
+					server.logger.Error("unable to send updated rate %f, from=%s to=%s", rate, fromCurrency, toCurrency)
 				}
 			}
 		}
@@ -81,13 +67,7 @@ func (server *Server) MakeExchange(
 	exchangeRequest *grpcservice.ExchangeRequest,
 ) (*grpcservice.ExchangeResponse, error) {
 
-	server.logger.Info(
-		"handle 'grpcservice.Exchanger.MakeExchange'",
-		"from",
-		exchangeRequest.GetFrom(),
-		"to",
-		exchangeRequest.GetTo(),
-	)
+	server.logger.Info("handle 'grpcservice.Exchanger.MakeExchange', from=%s to=%s", exchangeRequest.GetFrom(), exchangeRequest.GetTo())
 
 	if exchangeRequest.GetFrom() == exchangeRequest.GetTo() {
 		grpcErr := status.Newf(
@@ -111,7 +91,7 @@ func (server *Server) MakeExchange(
 	)
 
 	if err != nil {
-		server.logger.Error("unable to get rate", "error", err)
+		server.logger.Error("unable to get rate: %s", err)
 	}
 
 	return &grpcservice.ExchangeResponse{
@@ -136,17 +116,11 @@ func (server *Server) Subscriber(subscriberServer grpcservice.Exchanger_Subscrib
 		}
 
 		if err != nil {
-			server.logger.Error("unable to read from client", "error", err)
+			server.logger.Error("unable to read from client: %s", err)
 			return err
 		}
 
-		server.logger.Info(
-			"handle client request",
-			"From",
-			exchangeRequest.GetFrom(),
-			"To",
-			exchangeRequest.GetTo(),
-		)
+		server.logger.Info("handle client request, from=%s to=%s", exchangeRequest.GetFrom(), exchangeRequest.GetTo())
 
 		subscribedClient, ok := server.subscribedClients[subscriberServer]
 		if !ok {
@@ -166,7 +140,7 @@ func (server *Server) Subscriber(subscriberServer grpcservice.Exchanger_Subscrib
 				)
 
 				if validationErr, err = validationErr.WithDetails(exchangeRequest); err != nil {
-					server.logger.Error("unable to get original request as metadata", "error", err)
+					server.logger.Error("unable to get original request as metadata: %s", err)
 				}
 
 				break
@@ -181,7 +155,7 @@ func (server *Server) Subscriber(subscriberServer grpcservice.Exchanger_Subscrib
 			})
 
 			if err != nil {
-				server.logger.Error("unable to send validation message", "error", err)
+				server.logger.Error("unable to send validation message: %s", err)
 			}
 
 			continue
