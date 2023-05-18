@@ -44,7 +44,7 @@ func New(src source, localXML string) *XML {
 
 func (extractor *XML) FetchData() error {
 	if extractor.source == SourceURL {
-		if err := extractor.decodeFromURL(); err != nil {
+		if err := extractor.readFromURL(); err != nil {
 			return err
 		}
 	} else {
@@ -56,7 +56,7 @@ func (extractor *XML) FetchData() error {
 	return nil
 }
 
-func (extractor *XML) decodeFromURL() error {
+func (extractor *XML) readFromURL() error {
 	response, err := http.DefaultClient.Get(urlXML)
 	if err != nil {
 		return err
