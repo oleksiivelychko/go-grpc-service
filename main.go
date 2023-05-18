@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/hashicorp/go-hclog"
 	"github.com/oleksiivelychko/go-grpc-service/exchanger"
 	"github.com/oleksiivelychko/go-grpc-service/extractor"
+	"github.com/oleksiivelychko/go-grpc-service/logger"
 	"github.com/oleksiivelychko/go-grpc-service/proto/grpcservice"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -12,12 +12,7 @@ import (
 )
 
 func main() {
-	hcLogger := hclog.New(&hclog.LoggerOptions{
-		Name:       "go-grpc-service",
-		Level:      hclog.LevelFromString("DEBUG"),
-		Color:      1,
-		TimeFormat: "02/01/2006 15:04:05",
-	})
+	log := logger.New()
 
 	grpcServer := grpc.NewServer()
 	reflection.Register(grpcServer)
@@ -25,22 +20,22 @@ func main() {
 	extractorXML := extractor.New(extractor.SourceLocal, "rates.xml")
 	processor, err := exchanger.NewProcessor(extractorXML)
 	if err != nil {
-		hcLogger.Error("unable to create processor", "error", err)
+		log.Error("unable to create processor: %s", err)
 		os.Exit(1)
 	}
 
-	exchangerServer := exchanger.NewServer(hcLogger, processor)
+	exchangerServer := exchanger.NewServer(processor, log)
 	grpcservice.RegisterExchangerServer(grpcServer, exchangerServer)
 
 	listenerTCP, err := net.Listen("tcp", exchangerServer.EnvAddress())
 	if err != nil {
-		hcLogger.Error("unable to listen TCP", "error", err)
+		log.Error("unable to listen TCP: %s", err)
 		os.Exit(1)
 	}
 
-	hcLogger.Info("starting gRPC server", "listening", exchangerServer.EnvAddress())
+	log.Info("listening gRPC server on %s", exchangerServer.EnvAddress())
 	if err = grpcServer.Serve(listenerTCP); err != nil {
-		hcLogger.Error("unable to start gRPC server", "error", err)
+		log.Error("unable to start gRPC server: %s", err)
 		os.Exit(1)
 	}
 }
