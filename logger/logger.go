@@ -18,6 +18,14 @@ func New() *Logger {
 	}
 }
 
+func (logger *Logger) GetInfoLogger() *log.Logger {
+	return logger.info
+}
+
+func (logger *Logger) GetErrorLogger() *log.Logger {
+	return logger.error
+}
+
 func (logger *Logger) Info(message string, args ...any) {
 	logger.info.Printf("%s\n", fmt.Sprintf(message, args...))
 }
