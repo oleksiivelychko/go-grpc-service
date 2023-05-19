@@ -33,7 +33,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	log.Info("listening gRPC server on %s", exchangerServer.EnvAddress())
+	log.Info("starting gRPC server on %s", exchangerServer.EnvAddress())
 	if err = grpcServer.Serve(listenerTCP); err != nil {
 		log.Error("unable to start gRPC server: %s", err)
 		os.Exit(1)
