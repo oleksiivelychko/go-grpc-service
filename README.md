@@ -17,4 +17,6 @@ go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
 }
 ```
 
+![gRPC service is running](social_preview.png)
+
 🎥 Thanks [Nic Jackson](https://www.youtube.com/c/NicJackson) for sharing his knowledge.
